@@ -1224,6 +1224,45 @@ function MineKhan() {
 	const FIRE_SPREAD_TRIES = 3    // ile prób zapalenia sąsiedztwa na aktualizację
 	const FIRE_DIRS = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]
 
+	const SEA_LEVEL = 62 // wysokość tafli wody; teren niższy zostaje zalany
+	const LAKE_SCALE = 0.008       // mniejsza liczba = większe jeziora
+	const LAKE_COVER = 0.12        // mniej więcej tyle terenu na szumie jezior to jeziora (0.05 = rzadko, 0.2 = dużo)
+	const LAKE_DEPTH = 7           // głębokość w środku jeziora
+	const LAND_MIN = SEA_LEVEL + 2 // najniższy suchy ląd (niziny są do tego podnoszone)
+	let lakeCache = null
+	function lakeNoise(x, z) {
+		return noise(x * LAKE_SCALE + 300, z * LAKE_SCALE + 300)
+	}
+	function lakeLimits() { // progi z rozkładu szumu danego ziarna, więc działają tak samo w każdym świecie
+		if (lakeCache && lakeCache.seed === noiseProfile.seed) return lakeCache
+		const v = []
+		for (let i = 0; i < 48; i++) {
+			for (let j = 0; j < 48; j++) {
+				v.push(noise(i * 5.31 + 0.37, j * 5.31 + 0.73))
+			}
+		}
+		v.sort((a, b) => a - b)
+		lakeCache = {
+			seed: noiseProfile.seed,
+			lo: v[Math.floor(v.length * (1 - LAKE_COVER))],            // tu zaczyna się jezioro
+			hi: v[Math.floor(v.length * (1 - LAKE_COVER * 0.35))]      // tu osiąga pełną głębokość
+		}
+		return lakeCache
+	}
+	function terrainHeight(x, z) {
+		if (superflat) return 4
+		const g = Math.round(noise(x * generator.smooth, z * generator.smooth) * generator.height) + generator.extra
+		const lim = lakeLimits()
+		let t = (lakeNoise(x, z) - lim.lo) / (lim.hi - lim.lo)
+		t = t < 0 ? 0 : t > 1 ? 1 : t
+		let s = t * t * (3 - 2 * t) // gładkie przejście 0-1
+		// jeziora tylko na niskim i średnim terenie, nie wykopujemy dołów w górach
+		const low = (SEA_LEVEL + 16 - g) / 10
+		s *= low < 0 ? 0 : low > 1 ? 1 : low
+		const dry = Math.max(g, LAND_MIN)
+		return Math.round(dry + (SEA_LEVEL - LAKE_DEPTH - dry) * s)
+	}
+
 	const WATER_H = [16, 14, 12, 10.5, 9, 7.5, 6, 4.5, 16] // wysokość w 1/16 bloku: poziomy 0-7 i 8 (spadająca)
 	const WATER_DIRS = [[1,0],[-1,0],[0,1],[0,-1]]          // kierunek przeciwny do i to i ^ 1
 	const WATER_TICK = 250
@@ -3334,7 +3373,11 @@ function MineKhan() {
 	function carveSphere(x, y, z) {
 		if (y > 3) {
 			for (let i = 0; i < sphere.length; i += 3) {
-				world.setBlock(x + sphere[i], y + sphere[i + 1], z + sphere[i + 2], blockIds.air, true)
+				const bx = x + sphere[i], by = y + sphere[i + 1], bz = z + sphere[i + 2]
+				// nie wycinaj wody ani bloku leżącego bezpośrednio pod wodą
+				if ((world.getBlock(bx, by, bz) & 0xff) === blockIds.waterBlock) continue
+				if ((world.getBlock(bx, by + 1, bz) & 0xff) === blockIds.waterBlock) continue
+				world.setBlock(bx, by, bz, blockIds.air, true)
 			}
 		}
 	}
@@ -3911,7 +3954,7 @@ function MineKhan() {
 					wx = this.x + i
 					wz = this.z + k
 					ground = this.tops[k * 16 + i]
-					if (trees && random() < 0.005 && this.getBlock(i, ground, k)) {
+					if (trees && ground > SEA_LEVEL + 1 && random() < 0.005 && this.getBlock(i, ground, k)) {
 
 						top = ground + Math.floor(4.5 + random(2.5))
 						rand = Math.floor(random(4096))
@@ -4199,7 +4242,10 @@ function MineKhan() {
 		constructor() {
 			generatedChunks = 0
 			fogDist = 16
-			p.y = superflat ? 6 : (Math.round(noise(8 * generator.smooth, 8 * generator.smooth) * generator.height) + 2 + generator.extra)
+			const spawn = findSpawn()
+			p.x = spawn[0]
+			p.y = spawn[2]
+			p.z = spawn[1]
 
 			//Initialize the world's arrays
 			this.chunks = []
@@ -4235,7 +4281,7 @@ function MineKhan() {
 			let gen = 0
 			for (let i = 0; i < 16; i++) {
 				for (let k = 0; k < 16; k++) {
-					gen = superflat ? 4 : Math.round(noise((trueX + i) * smoothness, (trueZ + k) * smoothness) * hilliness) + generator.extra
+					gen = terrainHeight(trueX + i, trueZ + k)
 					chunk.tops[k * 16 + i] = gen
 
 					chunk.setBlock(i, gen, k, blockIds.grass)
@@ -4246,6 +4292,19 @@ function MineKhan() {
 						chunk.setBlock(i, j, k, blockIds.stone)
 					}
 					chunk.setBlock(i, 0, k, blockIds.bedrock)
+					if (!superflat) {
+						// plaża i dno zbiornika
+						if (gen <= SEA_LEVEL + 1) {
+							const bed = (gen < SEA_LEVEL && noise((trueX + i) * 0.1, (trueZ + k) * 0.1) > 0.55) ? blockIds.gravel : blockIds.sand
+							chunk.setBlock(i, gen, k, bed)
+							chunk.setBlock(i, gen - 1, k, bed)
+							chunk.setBlock(i, gen - 2, k, bed)
+						}
+						// woda
+						for (let j = gen + 1; j <= SEA_LEVEL; j++) {
+							chunk.setBlock(i, j, k, blockIds.waterBlock)
+						}
+					}
 				}
 			}
 			chunk.generated = true
@@ -5221,6 +5280,12 @@ function MineKhan() {
 		Button.add(width / 2, 285, 300, 40, currentLanguage === "English" ? "Game Mode: Creative" : "Tryb Gry: Kreatywny", "creation menu", nothing, always, currentLanguage === "English" ? "Not available" : "Nie dostępny")
 		Button.add(width / 2, 335, 300, 40, currentLanguage === "English" ? "Difficulty: Peaceful" : "Poziom trudności: Pokojowy", "creation menu", nothing, always, currentLanguage === "English" ? "Not available" : "Nie dostępny")
 		Button.add(width / 2, height - 90, 300, 40, currentLanguage === "English" ? "Create New World" : "Stwórz Nowy Świat", "creation menu", r => {
+			worldSeed = Math.random() * 2000000000 | 0
+			seedHash(worldSeed)
+			caveNoise = openSimplexNoise(worldSeed)
+			noiseSeed(worldSeed)
+			world = new World()
+			world.id = Date.now()
 			world = new World()
 			world.id = Date.now()
 			let name = boxCenterTop.value || currentLanguage === "English" ? "World" : "Nowy Świat"
@@ -6195,6 +6260,22 @@ function MineKhan() {
 		dirtbg = ctx.createImageData(width, height)
 		dirtbg.data.set(pixels)
 	}
+	
+	function findSpawn() { // zwraca [x, z, y] najbliższego miejsca na lądzie
+		if (superflat) return [8, 8, 6]
+		const h = (x, z) => terrainHeight(x, z)
+		for (let r = 0; r <= 600; r += 4) {
+			const n = r === 0 ? 1 : 16
+			for (let i = 0; i < n; i++) {
+				const x = Math.round(8 + Math.cos(i / n * Math.PI * 2) * r)
+				const z = Math.round(8 + Math.sin(i / n * Math.PI * 2) * r)
+				const g = h(x, z)
+				if (g >= SEA_LEVEL + 2) return [x, z, g + 2]
+			}
+		}
+		return [8, 8, SEA_LEVEL + 4]
+	}
+
 	function initPlayer() {
 		p = new Camera()
 		p.speed = 0.075
@@ -6202,9 +6283,10 @@ function MineKhan() {
 		p.pos = new Float32Array(3)
 		p.sprintSpeed = 1.5
 		p.flySpeed = 2.5
-		p.x = 8
-		p.y = superflat ? 6 : (Math.round(noise(8 * generator.smooth, 8 * generator.smooth) * generator.height) + 2 + generator.extra)
-		p.z = 8
+		const spawn = findSpawn()
+		p.x = spawn[0]
+		p.y = spawn[2]
+		p.z = spawn[1]
 		p.previousX = 8
 		p.previousY = 70
 		p.previousZ = 8
