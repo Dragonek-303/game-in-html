@@ -427,8 +427,17 @@ function MineKhan() {
     chiseledSandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
     ironBarsSide: "0g0g200000000sywflk0010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100001000001000010011111111111111110010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100",
     ironBarsTop: "0g0g100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    waterBlock: "0g0g70b5rqnk0b62z740ddzq9c0deaysw0dem7cg0fmiyeo0fmu6y83100001333211366000133100000000033310100013352133000000000000101000000000000013100000131000000001001000012113452100012310000013321112111111343331100000000011323000000000000011000000000000000001200001100000000110000001111110100000000121362000000121346633311",
-    altLeavesSide: "0g0gr029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k20auw0k5fqig0k5qz200k6296g11vskc8j9dck8cpj31111ch1111112doeoj1111114on11111bi0dpl14dfo15gj30111fj060111ceo4311314mmmmmmmmmmmmmmmmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmmmmmmmmmmmmmmmm113dc441111cceo0dol10fnp336111344dk231dh151dno11o41jk11476achk3k",
+	waterBlock: function(n) {
+		for (let y = 0; y < 16; y++) {
+			for (let x = 0; x < 16; x++) {
+				// okresowy wzór: lewa krawędź = prawa, góra = dół, więc bloki łączą się bez szwów
+				const w = Math.sin(x * Math.PI / 4 + Math.sin(y * Math.PI / 8) * 1.5) * Math.sin(y * Math.PI / 4 + Math.sin(x * Math.PI / 8) * 1.5)
+				const d = 0.92 + w * 0.05
+				setPixel(n, x, y, 40 * d, 100 * d, 220 * d, 200) // ostatnia liczba = przezroczystość (255 = pełna)
+			}
+		}
+	},
+	altLeavesSide: "0g0gr029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k20auw0k5fqig0k5qz200k6296g11vskc8j9dck8cpj31111ch1111112doeoj1111114on11111bi0dpl14dfo15gj30111fj060111ceo4311314mmmmmmmmmmmmmmmmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmmmmmmmmmmmmmmmm113dc441111cceo0dol10fnp336111344dk231dh151dno11o41jk11476achk3k",
     altLeavesTop: "0g0gp029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k5fqig0k5qz200k6296gj9dck8coj31111ch1111112dnenj1111114nm11111bi0dol14dfn15gj30111fj060111cen4311314hbjm121341cjmn3111cn14hfmj63bj113111111ddk111011k101kk41113fkh4an83cfk1ek1hchk21331111ddo91137111deek1113141nnn1113dc441111ccen0dnl10fmo336111344dk231dh151dmn11n41jk11476achk3k",
     oakDoorTip: "0g0ga04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4hlvc0b4suew0dcplh40xfchyo8887775544442110874444432221101184444444444221418547559999444242844755999944224284469999999922428447999999992242844799999999224284479999999922428447999999992242844599999999224284459999999922428445999999992242844599999999224274449999999922427444999999992242",
     oakDoorBittim: "0g0gb02881dk04g4sfs04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4suew0xfchyo1d0kx6g86469999999944648646999999994a6486469999999944448646999999994364764699999999436474469999999933646446999999993364643699999999335364369999999933536334999999993343633499999999324343249999999922424223999999992232311333999922223221122299992211311001111111111121",
@@ -486,6 +495,31 @@ function MineKhan() {
 		px(4, 1, K2); px(5, 1, K2)
 		px(4, 0, K3); px(5, 0, K1)
 		px(3, 1, K3); px(6, 1, K3)
+	},
+	ladder: function(n) {
+		for (let y = 0; y < 16; y++) {
+			for (let x = 0; x < 16; x++) {
+				const rail = x <= 2 || x >= 13
+				const rung = y % 5 < 2 && x > 2 && x < 13
+				if (rail || rung) {
+					const d = 0.8 + Math.random() * 0.2
+					setPixel(n, x, y, 150 * d, 110 * d, 60 * d, 255)
+				} else {
+					setPixel(n, x, y, 0, 0, 0, 0)
+				}
+			}
+		}
+	},
+	trapdoor: function(n) {
+		for (let y = 0; y < 16; y++) {
+			for (let x = 0; x < 16; x++) {
+				const d = 0.9 + Math.random() * 0.1
+				const frame = x < 2 || x > 13 || y < 2 || y > 13 || (y >= 6 && y <= 9)
+				let r = frame ? 160 : 190, g = frame ? 120 : 154, b = frame ? 70 : 96
+				if (x === 7 || x === 8) { r *= 0.8; g *= 0.8; b *= 0.8 }
+				setPixel(n, x, y, r * d, g * d, b * d, 255)
+			}
+		}
 	},
     
 	}
@@ -643,9 +677,11 @@ function MineKhan() {
 	  shadow: false,
     },
     { name: "waterBlock",
-      transparent: true,
-	  shadow: false,
-    },
+	transparent: true,
+	shadow: false,
+	noCollide: true,
+	special: true,
+	},
     { name: "altLeaves",
       textures: [ "altLeavesTop", "altLeavesSide" ],
 	  hidden: true
@@ -656,18 +692,20 @@ function MineKhan() {
 	{ name: "oakDoorBittimboi", hidden: true },
 	{ name: "dispenserBlick", hidden: true },
 	{ name: "iceBlick",
-	  transparent: true,
-	  shadows: false,
+	transparent: true,
+	shadow: false,
 	},
 	{ name: "cobwebBlick",
-	  transparent: true,
-	  shadows: false,
+	transparent: true,
+	shadow: false,
+	noCollide: true,
 	},
 	{ name: "crackedStoneBrick" },
 	{ name: "grassLeaves",
 	  textures: [ "grassLeavesTop", "grassLeavesSide" ],
 	  transparent: true,
 	  shadows: false,
+	  noCollide: true,
 	},
 	{ name: "blackStainedGlass",
 	  transparent: true,
@@ -676,12 +714,13 @@ function MineKhan() {
 	{ name: "whiteTerracotta" },
 	{ name: "sidewaysPillar" },
 
-	{ name: "torch",   transparent: true, shadow: false, noCollide: true, special: true },
-	{ name: "fire",    transparent: true, shadow: false, noCollide: true, special: true, hidden: true },
+	{ name: "torch", transparent: true, shadow: false, noCollide: true, special: true },
+	{ name: "fire", transparent: true, shadow: false, noCollide: true, special: true, hidden: true },
 	{ name: "lighter", special: true },
 	{ name: "oakDoorBottom", textures: "oakDoorBittim", transparent: true, shadow: false, special: true },
-	{ name: "oakDoorTop",    textures: "oakDoorTip",    transparent: true, shadow: false, special: true, hidden: true },
-		
+	{ name: "oakDoorTop", textures: "oakDoorTip", transparent: true, shadow: false, special: true, hidden: true },
+	{ name: "ladder", transparent: true, shadow: false, noCollide: true, special: true },
+	{ name: "trapdoor", transparent: true, shadow: false, special: true },
 		
 	]
 	const BLOCK_COUNT = blockData.length;
@@ -1179,6 +1218,31 @@ function MineKhan() {
 	win.blockData = blockData
 	win.blockIds = blockIds
 
+	// ===== OGIEŃ: ustawienia =====
+	const FIRE_TICK_MIN = 1000     // minimalny czas między aktualizacjami jednego ognia (ms)
+	const FIRE_TICK_RAND = 1000    // + losowo do tylu ms
+	const FIRE_SPREAD_TRIES = 3    // ile prób zapalenia sąsiedztwa na aktualizację
+	const FIRE_DIRS = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]
+
+	const WATER_H = [16, 14, 12, 10.5, 9, 7.5, 6, 4.5, 16] // wysokość w 1/16 bloku: poziomy 0-7 i 8 (spadająca)
+	const WATER_DIRS = [[1,0],[-1,0],[0,1],[0,-1]]          // kierunek przeciwny do i to i ^ 1
+	const WATER_TICK = 250
+	const WATER_REACH = 4 // jak daleko woda szuka spadku
+	function waterH(s) { return WATER_H[(s >> 8) & 15] / 16 }
+
+	// Szansa spalenia bloku przez sąsiedni ogień na aktualizację (0 = niepalny)
+	const burnChance = new Float32Array(256)
+	for (let i = 1; i < blockData.length && i < 256; i++) {
+		const n = blockData[i] && blockData[i].name
+		if (!n) continue
+		if (/eaves$/.test(n)) burnChance[i] = 0.45          // liście
+		else if (/Wool$/.test(n)) burnChance[i] = 0.3
+		else if (n === "bookshelf") burnChance[i] = 0.2
+		else if (/Planks$/.test(n)) burnChance[i] = 0.15
+		else if (n === "oakDoorBottom" || n === "oakDoorTop") burnChance[i] = 0.15
+		else if (/Log$/.test(n)) burnChance[i] = 0.08       // pnie palą się wolno
+	}
+
 	let currentFov
 
 	
@@ -1573,6 +1637,31 @@ function MineKhan() {
 		cull: { top: 0, bottom: 0, north: 0, south: 0, east: 0, west: 0 },
 		texVerts: [], varients: [], buffer: null, size: 6, rotate: true, flip: false
 	},
+	ladder: {
+		verts: [
+			[objectify( 0,  0, 0, 16,  2, 0, 0)], //bottom
+			[objectify( 0, 16, 2, 16,  2, 0, 0)], //top
+			[objectify(16, 16, 2, 16, 16, 0, 0)], //north
+			[objectify( 0, 16, 0, 16, 16, 0, 0)], //south
+			[objectify(16, 16, 0,  2, 16, 0, 0)], //east
+			[objectify( 0, 16, 2,  2, 16, 0, 0)]  //west
+		],
+		cull: { top: 0, bottom: 0, north: 0, south: 0, east: 0, west: 0 },
+		texVerts: [], varients: [], buffer: null, size: 6, rotate: true, flip: false
+	},
+	// zamknięta klapa = cienka płyta 3/16 (flip daje wersję przy suficie)
+	trapdoor: {
+		verts: [
+			[objectify( 0, 0,  0, 16, 16, 0, 0)], //bottom
+			[objectify( 0, 3, 16, 16, 16, 0, 0)], //top
+			[objectify(16, 3, 16, 16,  3, 0, 0)], //north
+			[objectify( 0, 3,  0, 16,  3, 0, 0)], //south
+			[objectify(16, 3,  0, 16,  3, 0, 0)], //east
+			[objectify( 0, 3, 16, 16,  3, 0, 0)]  //west
+		],
+		cull: { top: 0, bottom: 3, north: 0, south: 0, east: 0, west: 0 },
+		texVerts: [], varients: [], buffer: null, size: 6, rotate: false, flip: true
+	},
 	}
 	win.shapes = shapes
 
@@ -1871,6 +1960,43 @@ function MineKhan() {
 					b.shape = shape
 					blockData[base.id | (r << 11) | (open << 10)] = b
 				}
+			}
+		}
+		// Drabinka: stan = id | obrót (0x1800). Płyta jest po stronie ściany.
+		for (let r = 0; r < 4; r++) {
+			const shape = shapes.ladder.varients[rotIndex[turns[r]]]
+			const base = blockData[blockIds.ladder]
+			if (r === 0) { base.shape = shape; continue }
+			const b = Object.create(base)
+			b.shape = shape
+			blockData[base.id | (r << 11)] = b
+		}
+
+		// Klapa: stan = id | obrót (0x1800) | otwarta (0x400) | góra (0x100)
+		{
+			const trap = blockData[blockIds.trapdoor]
+			const doorVar = shapes.door.varients
+			for (let r = 0; r < 4; r++) {
+				for (let top = 0; top < 2; top++) {
+					for (let open = 0; open < 2; open++) {
+						const shape = open
+							? doorVar[rotIndex[turns[r]]]
+							: (top ? shapes.trapdoor.varients[1] : shapes.trapdoor)
+						const state = trap.id | (r << 11) | (top << 8) | (open << 10)
+						if (state === trap.id) { trap.shape = shape; continue }
+						const b = Object.create(trap)
+						b.shape = shape
+						blockData[state] = b
+					}
+				}
+			}
+		}
+		
+		// Woda: stan = id | poziom << 8 (0 źródło, 1-7 płynąca, 8 spadająca)
+		{
+			const base = blockData[blockIds.waterBlock]
+			for (let lvl = 1; lvl <= 8; lvl++) {
+				blockData[base.id | (lvl << 8)] = Object.create(base)
 			}
 		}
 	}
@@ -2551,7 +2677,7 @@ function MineKhan() {
 	}
 	function runRayTrace(x, y, z) {
 		let block = world.getBlock(x, y, z)
-		if (block) {
+		if (block && (block & 0xff) !== blockIds.waterBlock) {
 			let shape = blockData[block].shape
 			let rt = rayTrace(x, y, z, blockData[block].shape)
 
@@ -2572,7 +2698,7 @@ function MineKhan() {
 			return
 		}
 		let blockState = world.getBlock(p2.x, p2.y, p2.z)
-		if (blockState) {
+		if (blockState && !blockData[blockState].noCollide) {
 			hitBox.pos = [ p2.x, p2.y, p2.z ]
 			hitBox.closest = 0
 			hitBox.shape = blockData[blockState].shape
@@ -2757,6 +2883,128 @@ function MineKhan() {
 			this.size = 0
 		},
 	}
+	const LADDER_WALL = [[0,-1],[0,1],[-1,0],[1,0]] // [dx,dz] ściany dla NORTH,SOUTH,EAST,WEST
+
+	function bodyState(id) { // stan bloku "id", w którym jest ciało gracza, albo 0
+		const x = Math.round(p.x), z = Math.round(p.z)
+		const feet = p.y - p.bottomH
+		const ys = [feet + 0.1, feet + 0.9, p.y]
+		for (let i = 0; i < 3; i++) {
+			const s = world.getBlock(x, Math.round(ys[i]), z)
+			if ((s & 0xff) === id) return s
+		}
+		return 0
+	}
+	function checkLadders(x, y, z) { // po zniszczeniu bloku usuń drabinki, które straciły ścianę
+		const n = [[1,0],[-1,0],[0,1],[0,-1]]
+		for (let i = 0; i < 4; i++) {
+			const nx = x + n[i][0], nz = z + n[i][1]
+			const s = world.getBlock(nx, y, nz)
+			if ((s & 0xff) !== blockIds.ladder) continue
+			const d = LADDER_WALL[(s >> 11) & 3]
+			if (!world.getBlock(nx + d[0], y, nz + d[1])) world.setBlock(nx, y, nz, 0)
+		}
+	}
+	function waterTop() { // wysokość powierzchni wody w kolumnie gracza albo null
+		const x = Math.round(p.x), z = Math.round(p.z)
+		const feet = p.y - p.bottomH
+		const cy = Math.round(feet + 0.05)
+		let top = null
+		for (let i = 0; i < 4; i++) {
+			const s = world.getBlock(x, cy + i, z)
+			if ((s & 0xff) !== blockIds.waterBlock) break
+			top = cy + i - 0.5 + waterH(s)
+		}
+		return top
+	}
+	function waterPush(v) { // nurt znosi gracza w stronę niższej wody; zwraca true w spadającej wodzie
+		const x = Math.round(p.x), z = Math.round(p.z)
+		const cy = Math.round(p.y - p.bottomH + 0.05)
+		let fx = 0, fz = 0, fall = false
+		for (let k = 0; k < 2; k++) {
+			const y = cy + k
+			const s = world.getBlock(x, y, z)
+			if ((s & 0xff) !== blockIds.waterBlock) continue
+			if (((s >> 8) & 15) === 8) fall = true
+			const h = waterH(s)
+			for (const d of WATER_DIRS) {
+				const ns = world.getBlock(x + d[0], y, z + d[1])
+				let dh = 0
+				if ((ns & 0xff) === blockIds.waterBlock) {
+					dh = h - waterH(ns)
+				} else if (!ns || blockData[ns].noCollide) {
+					if ((world.getBlock(x + d[0], y - 1, z + d[1]) & 0xff) === blockIds.waterBlock) dh = h
+				}
+				fx += d[0] * dh
+				fz += d[1] * dh
+			}
+		}
+		const m = Math.hypot(fx, fz)
+		if (m > 0.01) {
+			v.x += fx / m * 0.02
+			v.z += fz / m * 0.02
+		}
+		return fall
+	}
+	function mediumPhysics() {
+		p.inWater = false
+		p.inWeb = false
+		p.onIce = false
+		p.onLadder = 0
+
+		const top = waterTop()
+		const under = top !== null && p.y < top
+		if (under !== !!p.underwater) { p.underwater = under; updateHUD = true }
+
+		if (p.spectator || p.flying) return
+		const v = p.velocity
+		const depth = top === null ? 0 : top - (p.y - p.bottomH)
+
+		// Lód: blok pod stopami
+		const fy = p.y - p.bottomH
+		const by = Math.round(fy - 0.55)
+		const below = world.getBlock(Math.round(p.x), by, Math.round(p.z)) & 0xff
+		p.onIce = below === blockIds.iceBlick && Math.abs(fy - (by + 0.5)) < 0.15
+
+		p.inWeb = !!bodyState(blockIds.cobwebBlick)
+		p.onLadder = bodyState(blockIds.ladder)
+		p.inWater = depth >= 0.5 // pływanie dopiero w wodzie głębszej niż pół bloku
+
+		if (depth > 0) {
+			const falling = waterPush(v)
+			if (p.inWater) {
+				v.x *= 0.7
+				v.z *= 0.7
+				let target = -0.02
+				if (Key[" "]) target = p.underwater ? 0.07 : 0.14
+				else if (Key.shift) target = -0.08
+				v.y += (target - v.y) * 0.3
+			} else { // płytka woda: tylko spowalnia i znosi
+				v.x *= 0.9
+				v.z *= 0.9
+				if (Key[" "]) v.y = Math.max(v.y, 0.25)
+			}
+		}
+		if (p.inWeb) {
+			v.x *= 0.25
+			v.z *= 0.25
+			v.y = Math.max(-0.04, Math.min(0.04, v.y))
+		}
+		if (p.onLadder) {
+			const d = LADDER_WALL[(p.onLadder >> 11) & 3]
+			const into = (p.inputX || 0) * d[0] + (p.inputZ || 0) * d[1]
+			if (Key[" "] || into > 0.01) v.y = 0.1
+			else if (p.sneaking) v.y = 0
+			else if (into >= -0.01) v.y = -0.05
+		}
+	}
+	function safeMediumPhysics() { // błąd tutaj nie zatrzyma ruchu gracza
+		try {
+			mediumPhysics()
+		} catch (e) {
+			if (!safeMediumPhysics.warned) { safeMediumPhysics.warned = true; console.error("mediumPhysics:", e) }
+		}
+	}
 	let resolveContactsAndUpdatePosition = function() {
 		let pminX = p2.x - 1
 		let pmaxX = p2.x + 1
@@ -2857,26 +3105,22 @@ function MineKhan() {
 			vel.z = 0
 		}
 
-		if (!p.flying) {
-			let drag = p.onGround ? 0.5 : 0.85
-			p.velocity.z += (p.velocity.z * drag - p.velocity.z) * dt
-			p.velocity.x += (p.velocity.x * drag - p.velocity.x) * dt
-		} else {
-			let drag = 0.9
-			p.velocity.z += (p.velocity.z * drag - p.velocity.z) * dt
-			p.velocity.x += (p.velocity.x * drag - p.velocity.x) * dt
-			p.velocity.y += (p.velocity.y * 0.8 - p.velocity.y) * dt
+		let drag = p.onIce ? 0.94 : (p.onGround ? 0.5 : 0.85)
+		p.velocity.z += (p.velocity.z * drag - p.velocity.z) * dt
+		p.velocity.x += (p.velocity.x * drag - p.velocity.x) * dt
+		if (p.flying) {
+			// tłumienie ruchu pionowego tylko w locie
+			p.velocity.y += (p.velocity.y * 0.85 - p.velocity.y) * dt
 			if (p.onGround && !p.spectator) {
 				p.flying = false
 			}
 		}
-
 		p.lastUpdate = win.performance.now()
 		contacts.clear()
 		lookingAt()
 	}
 	let runGravity = function() {
-		if (p.flying) {
+		if (p.flying || p.inWater) {
 			return
 		}
 		let dt = (win.performance.now() - p.lastUpdate) / 33
@@ -2955,7 +3199,15 @@ function MineKhan() {
 		world.setBlock(x, y + 1, z, blockIds.oakDoorTop | rot)
 		p.lastPlace = Date.now()
 	}
-
+	function isTrapdoor(state) {
+		return (state & 0xff) === blockIds.trapdoor
+	}
+	function toggleTrapdoor(x, y, z) {
+		const s = world.getBlock(x, y, z)
+		if (!isTrapdoor(s)) return false
+		world.setBlock(x, y, z, s ^ OPEN)
+		return true
+	}
 	function changeWorldBlock(t) {
 		let pos = hitBox.pos
 		if (!t && pos && isDoor(world.getBlock(pos[0], pos[1], pos[2]))) {
@@ -2982,6 +3234,7 @@ function MineKhan() {
 			}
 
 			world.setBlock(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2], t)
+			if (!t) checkLadders(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2])
 			if (t) {
 				p.lastPlace = Date.now()
 			} else {
@@ -2992,8 +3245,10 @@ function MineKhan() {
 	function newWorldBlock() {
 		if (!hitBox.pos || !holding) return
 		let pos = hitBox.pos, x = pos[0], y = pos[1], z = pos[2]
-		if (isDoor(world.getBlock(x, y, z))) return // prawy klik na drzwi je otwiera, nie stawia bloku
-		switch (hitBox.face) {
+		const target = world.getBlock(x, y, z) // blok, w który celujesz
+		if (isDoor(target) || isTrapdoor(target)) return // PPM otwiera
+		const face = hitBox.face
+		switch (face) {
 			case "top": y += 1; break
 			case "bottom": y -= 1; break
 			case "south": z -= 1; break
@@ -3001,7 +3256,8 @@ function MineKhan() {
 			case "west": x -= 1; break
 			case "east": x += 1; break
 		}
-		if (world.getBlock(x, y, z) || y <= 0 || y >= maxHeight - 1) return
+		const cur = world.getBlock(x, y, z)
+		if ((cur && (cur & 0xff) !== blockIds.waterBlock) || y <= 0 || y >= maxHeight - 1) return
 
 		if (holding === blockIds.lighter) { // zapalniczka stawia ogień
 			world.setBlock(x, y, z, blockIds.fire)
@@ -3010,6 +3266,32 @@ function MineKhan() {
 		}
 		if (holding === blockIds.oakDoorBottom) {
 			if (!inBox(x, y, z, 1, 1, 1) && !inBox(x, y + 1, z, 1, 1, 1) && !world.getBlock(x, y + 1, z)) placeDoor(x, y, z)
+			return
+		}
+		if (holding === blockIds.ladder) {
+			// tylko na bocznej ścianie pełnego bloku (nie góra/dół, nie w powietrzu)
+			const rot = { north: NORTH, south: SOUTH, east: EAST, west: WEST }[face]
+			if (rot === undefined) return
+			const sd = blockData[target]
+			if (!target || !sd || sd.noCollide || sd.special || (target & ~0xff) !== 0) return
+			world.setBlock(x, y, z, blockIds.ladder | rot)
+			p.lastPlace = Date.now()
+			return
+		}
+		if (holding === blockIds.trapdoor) {
+			if (inBox(x, y, z, 1, 1, 1)) return
+			let rot = { north: NORTH, south: SOUTH, east: EAST, west: WEST }[face]
+			if (rot === undefined) { // góra/dół: obrót według kierunku patrzenia
+				const pi = Math.PI / 4
+				rot = NORTH
+				if (p.ry > pi && p.ry < 3 * pi) rot = WEST
+				else if (p.ry >= 3 * pi && p.ry < 5 * pi) rot = SOUTH
+				else if (p.ry >= 5 * pi && p.ry < 7 * pi) rot = EAST
+			}
+			const hy = (p.direction.y * hitBox.closest + p.y) % 1
+			const top = face === "bottom" || (face !== "top" && hy < 0.5)
+			world.setBlock(x, y, z, blockIds.trapdoor | rot | (top ? SLAB : 0))
+			p.lastPlace = Date.now()
 			return
 		}
 		if (!inBox(x, y, z, 1, 1, 1)) {
@@ -3075,6 +3357,9 @@ function MineKhan() {
 		let block = func.call(world, x, y, z, blocks)
 		if (!block) {
 			return 1
+		}
+		if ((type & 0xff) === blockIds.waterBlock && (block & 0xff) === blockIds.waterBlock) {
+			return 0
 		}
 
 		let data = blockData[block]
@@ -3219,6 +3504,27 @@ function MineKhan() {
 		return (sx2 - sx) * y + sx
 	}
 
+	function waterCorner(x, y, z, dx, dz, blocks) { // wysokość narożnika wody (0-1)
+		let total = 0, weight = 0
+		for (let i = 0; i < 4; i++) {
+			const cx = x + (i & 1 ? dx : 0), cz = z + (i & 2 ? dz : 0)
+			const s = getBlock(cx, y, cz, blocks)
+			if ((s & 0xff) === blockIds.waterBlock) {
+				if ((getBlock(cx, y + 1, cz, blocks) & 0xff) === blockIds.waterBlock) return 1
+				const lvl = (s >> 8) & 15
+				const w = lvl === 0 ? 10 : 1
+				total += WATER_H[lvl] / 16 * w
+				weight += w
+			} else if (!s || blockData[s].noCollide) {
+				weight += 1 // puste sąsiedztwo obniża narożnik
+			}
+		}
+		return weight ? total / weight : 1
+	}
+	function waterVertY(vy, vx, vz, x, y, z, blocks) {
+		if (vy < -0.49) return vy // dolna krawędź zostaje
+		return waterCorner(x, y, z, vx > 0 ? 1 : -1, vz > 0 ? 1 : -1, blocks) - 0.5
+	}
 	class Section {
 		constructor(x, y, z, size, chunk) {
 			this.x = x
@@ -3348,7 +3654,7 @@ function MineKhan() {
 			}
 			this.renderData[index] = 1 << 31 | pos | visible << 13 | this.palleteMap[blockState]
 		}
-		genMesh(barray, index) {
+		genMesh(barray, index, pass) {
 			if (!this.renderLength) {
 				return index
 			}
@@ -3370,6 +3676,7 @@ function MineKhan() {
 			for (let i = 0; i < length; i++) {
 				data = rData[i]
 				block = blockData[pallete[data & 0x1fff]]
+				if ((block.id === blockIds.waterBlock) !== (pass === 1)) continue // pass 0 = bloki, 1 = woda
 				tex = block.textures
 				sides = data >> 13 & 0x3f
 				loc = data >> 19 & 0xfff
@@ -3383,6 +3690,7 @@ function MineKhan() {
 
 				shapeVerts = block.shape.verts
 				shapeTexVerts = block.shape.texVerts
+				const isWater = block.id === blockIds.waterBlock
 
 				let texNum = 0
 				for (let n = 0; n < 6; n++) {
@@ -3403,30 +3711,37 @@ function MineKhan() {
 							tx = texVerts[0]
 							ty = texVerts[1]
 							texShapeVerts = shapeTexVerts[n][facei]
+							let wy0 = verts[1], wy1 = verts[4], wy2 = verts[7], wy3 = verts[10]
+							if (isWater) {
+								wy0 = waterVertY(verts[1], verts[0], verts[2], x, y, z, blocks)
+								wy1 = waterVertY(verts[4], verts[3], verts[5], x, y, z, blocks)
+								wy2 = waterVertY(verts[7], verts[6], verts[8], x, y, z, blocks)
+								wy3 = waterVertY(verts[10], verts[9], verts[11], x, y, z, blocks)
+							}
 
 							barray[index] = verts[0] + x2
-							barray[index+1] = verts[1] + y2
+							barray[index+1] = wy0 + y2
 							barray[index+2] = verts[2] + z2
 							barray[index+3] = tx + texShapeVerts[0]
 							barray[index+4] = ty + texShapeVerts[1]
 							barray[index+5] = shadows[0]
 
 							barray[index+6] = verts[3] + x2
-							barray[index+7] = verts[4] + y2
+							barray[index+7] = wy1 + y2
 							barray[index+8] = verts[5] + z2
 							barray[index+9] = tx + texShapeVerts[2]
 							barray[index+10] = ty + texShapeVerts[3]
 							barray[index+11] = shadows[1]
 
 							barray[index+12] = verts[6] + x2
-							barray[index+13] = verts[7] + y2
+							barray[index+13] = wy2 + y2
 							barray[index+14] = verts[8] + z2
 							barray[index+15] = tx + texShapeVerts[4]
 							barray[index+16] = ty + texShapeVerts[5]
 							barray[index+17] = shadows[2]
 
 							barray[index+18] = verts[9] + x2
-							barray[index+19] = verts[10] + y2
+							barray[index+19] = wy3 + y2
 							barray[index+20] = verts[11] + z2
 							barray[index+21] = tx + texShapeVerts[6]
 							barray[index+22] = ty + texShapeVerts[7]
@@ -3541,6 +3856,18 @@ function MineKhan() {
 				gl.vertexAttribPointer(glCache.aTexture, 2, gl.FLOAT, false, 24, 12)
 				gl.vertexAttribPointer(glCache.aShadow, 1, gl.FLOAT, false, 24, 20)
 				gl.drawElements(gl.TRIANGLES, 6 * this.faces, gl.UNSIGNED_INT, 0)
+			}
+		}
+		renderWater() {
+			if (!this.waterBuffer || !this.waterFaces) {
+				return
+			}
+			if (p.canSee(this.x, this.minY, this.z, this.maxY)) {
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.waterBuffer)
+				gl.vertexAttribPointer(glCache.aVertex, 3, gl.FLOAT, false, 24, 0)
+				gl.vertexAttribPointer(glCache.aTexture, 2, gl.FLOAT, false, 24, 12)
+				gl.vertexAttribPointer(glCache.aShadow, 1, gl.FLOAT, false, 24, 20)
+				gl.drawElements(gl.TRIANGLES, 6 * this.waterFaces, gl.UNSIGNED_INT, 0)
 			}
 		}
 		updateBlock(x, y, z, world, lazy) {
@@ -3717,13 +4044,11 @@ function MineKhan() {
 			this.populated = true
 		}
 		genMesh() {
-			let start = win.performance.now()
 			let barray = bigArray
 			let index = 0
 			for (let i = 0; i < this.sections.length; i++) {
-				index = this.sections[i].genMesh(barray, index)
+				index = this.sections[i].genMesh(barray, index, 0)
 			}
-			let arrayDone = win.performance.now()
 
 			if (!this.buffer) {
 				this.buffer = gl.createBuffer()
@@ -3738,11 +4063,30 @@ function MineKhan() {
 				maxY = Math.max(maxY, y)
 				minY = Math.min(minY, y)
 			}
-			this.maxY = maxY
-			this.minY = minY
 			this.faces = data.length / 24
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer)
 			gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW)
+
+			// woda: osobny bufor, rysowany po wszystkich blokach
+			let windex = 0
+			for (let i = 0; i < this.sections.length; i++) {
+				windex = this.sections[i].genMesh(barray, windex, 1)
+			}
+			if (!this.waterBuffer) {
+				this.waterBuffer = gl.createBuffer()
+			}
+			let wdata = barray.slice(0, windex)
+			for (let i = 1; i < wdata.length; i += 6) {
+				y = wdata[i]
+				maxY = Math.max(maxY, y)
+				minY = Math.min(minY, y)
+			}
+			this.waterFaces = wdata.length / 24
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.waterBuffer)
+			gl.bufferData(gl.ARRAY_BUFFER, wdata, gl.DYNAMIC_DRAW)
+
+			this.maxY = maxY
+			this.minY = minY
 			this.lazy = false
 		}
 		tick() {
@@ -3758,17 +4102,25 @@ function MineKhan() {
 			let chunkX = this.x >> 4
 			let chunkZ = this.z >> 4
 			let load = null
-			
+
+			world.noWater = true
 			for (let i = 0; i < world.loadFrom.length; i++) {
 				load = world.loadFrom[i]
 				if (load.x === chunkX && load.z === chunkZ) {
 					let y = load.y * 16
 					for (let j in load.blocks) {
-						world.setBlock((j >> 8 & 15) + this.x, (j >> 4 & 15) + y, (j & 15) + this.z, load.blocks[j])
+						const bx = (j >> 8 & 15) + this.x, by = (j >> 4 & 15) + y, bz = (j & 15) + this.z
+						const bs = load.blocks[j]
+						world.setBlock(bx, by, bz, bs)
+						// niedokończony przepływ (poziom 1-8) wznawia się po wczytaniu
+						if ((bs & 0xff) === blockIds.waterBlock && (bs >> 8 & 15) !== 0) {
+							world.waterQueue.set(bx + "," + by + "," + bz, [bx, by, bz])
+						}
 					}
 					world.loadFrom.splice(i--, 1)
 				}
 			}
+			world.noWater = false
 			this.loaded = true
 		}
 	}
@@ -3862,6 +4214,11 @@ function MineKhan() {
 			this.meshQueue = []
 			this.loadFrom = []
 			this.lastChunk = ","
+			this.fires = new Map()
+			this.nextFireCheck = 0
+			this.waterQueue = new Map()
+			this.nextWaterTick = 0
+			this.noWater = false
 		}
 		genChunk(chunk) {
 			let x = chunk.x >> 4
@@ -3947,6 +4304,7 @@ function MineKhan() {
 				return
 			}
 			let chunk = this.chunks[x >> 4][z >> 4]
+			if (blockID === blockIds.fire) this.addFire(x, y, z)
 
 			let xm = x & 15
 			let zm = z & 15
@@ -3985,6 +4343,8 @@ function MineKhan() {
 			if (xm === 15 && zm === 0) { this.updateBlock(x + 1, y, z - 1, lazy); }
 			if (xm === 0 && zm === 15) { this.updateBlock(x - 1, y, z + 1, lazy); }
 			if (xm & zm === 15) { this.updateBlock(x + 1, y, z + 1, lazy); }
+			if (!this.noWater) this.queueWaterAround(x, y, z)
+			checkLadders(x, y, z)
 		}
 		spawnBlock(x, y, z, blockID) {
 			//Sets a block anywhere without causing block updates around it. Only to be used in world gen.
@@ -4006,6 +4366,233 @@ function MineKhan() {
 				chunk.setBlock(x & 15, y, z & 15, blockID, false)
 			}
 		}
+
+		addFire(x, y, z) {
+			this.fires.set(x + "," + y + "," + z, {
+				x: x, y: y, z: z, age: 0,
+				next: Date.now() + 800 + Math.random() * 1000
+			})
+		}
+		fireTick() {
+			const now = Date.now()
+			if (now < this.nextFireCheck) return
+			this.nextFireCheck = now + 200
+			for (const [key, f] of this.fires) {
+				if (now < f.next) continue
+				const chunk = this.chunks[f.x >> 4] && this.chunks[f.x >> 4][f.z >> 4]
+				if (!chunk || !chunk.loaded) continue
+				if (this.getBlock(f.x, f.y, f.z) !== blockIds.fire) {
+					this.fires.delete(key)
+					continue
+				}
+				if (maxDist(f.x >> 4, f.z >> 4, p.cx, p.cz) > settings.renderDistance) continue
+				f.next = now + FIRE_TICK_MIN + Math.random() * FIRE_TICK_RAND
+				this.updateFire(f)
+			}
+		}
+		updateFire(f) {
+			const x = f.x, y = f.y, z = f.z
+			const below = this.getBlock(x, y - 1, z)
+			const bd = blockData[below]
+			const eternal = (below & 0xff) === blockIds.netherrack
+			const solidBelow = below !== 0 && bd && !bd.transparent
+
+			// Palne bloki wokół
+			const fuel = []
+			for (const d of FIRE_DIRS) {
+				const id = this.getBlock(x + d[0], y + d[1], z + d[2]) & 0xff
+				if (burnChance[id]) fuel.push(d)
+			}
+
+			// Bez podparcia i bez paliwa ogień znika
+			if (!solidBelow && !fuel.length) {
+				this.setBlock(x, y, z, 0)
+				return
+			}
+
+			// Wygasanie (nie dotyczy netherracku)
+			if (!eternal) {
+				f.age++
+				if (f.age > (fuel.length ? 10 : 4) + Math.random() * 3) {
+					this.setBlock(x, y, z, 0)
+					return
+				}
+			}
+
+			// Palenie sąsiednich bloków
+			for (const d of fuel) {
+				const nx = x + d[0], ny = y + d[1], nz = z + d[2]
+				const id = this.getBlock(nx, ny, nz) & 0xff
+				if (Math.random() < burnChance[id]) {
+					// drzwi: spal obie połówki
+					if (id === blockIds.oakDoorBottom && (this.getBlock(nx, ny + 1, nz) & 0xff) === blockIds.oakDoorTop) this.setBlock(nx, ny + 1, nz, 0)
+					if (id === blockIds.oakDoorTop && (this.getBlock(nx, ny - 1, nz) & 0xff) === blockIds.oakDoorBottom) this.setBlock(nx, ny - 1, nz, 0)
+
+					this.setBlock(nx, ny, nz, 0)
+					if (ny > 0 && Math.random() < 0.5) this.setBlock(nx, ny, nz, blockIds.fire)
+					if (!eternal) {
+						this.setBlock(x, y, z, 0) // ogień, który spalił blok, też znika
+						return
+					}
+					break
+				}
+			}
+
+			// Rozprzestrzenianie na puste pola przylegające do palnych bloków
+			for (let i = 0; i < FIRE_SPREAD_TRIES; i++) {
+				const nx = x + (Math.random() * 3 | 0) - 1
+				const ny = y + (Math.random() * 5 | 0) - 1
+				const nz = z + (Math.random() * 3 | 0) - 1
+				if ((nx === x && ny === y && nz === z) || ny <= 0 || ny >= maxHeight - 1) continue
+				if (this.getBlock(nx, ny, nz) !== 0) continue
+				let best = 0
+				for (const d of FIRE_DIRS) {
+					const c = burnChance[this.getBlock(nx + d[0], ny + d[1], nz + d[2]) & 0xff]
+					if (c > best) best = c
+				}
+				if (best && Math.random() < best * 0.8) this.setBlock(nx, ny, nz, blockIds.fire)
+			}
+		}
+
+		waterAt(x, y, z) { // poziom wody (0-8) albo -1
+			const s = this.getBlock(x, y, z)
+			return (s & 0xff) === blockIds.waterBlock ? (s >> 8) & 15 : -1
+		}
+		isHole(x, y, z) { // powietrze lub woda: woda może tam spłynąć
+			const s = this.getBlock(x, y, z)
+			return s === 0 || (s & 0xff) === blockIds.waterBlock
+		}
+		waterPassable(x, y, z) { // woda może przez to przepłynąć (nie źródło)
+			const s = this.getBlock(x, y, z)
+			return s === 0 || ((s & 0xff) === blockIds.waterBlock && ((s >> 8) & 15) !== 0)
+		}
+		canWriteWater(x, z) {
+			const c = this.chunks[x >> 4] && this.chunks[x >> 4][z >> 4]
+			return !!c && c.loaded
+		}
+		waterEmit(x, y, z) { // poziom, jaki ta komórka daje sąsiadom na boki (99 = nic)
+			const L = this.waterAt(x, y, z)
+			if (L < 0) return 99
+			if (L === 0) return 1
+			if (this.isHole(x, y - 1, z)) return 99 // woda spada, nie rozlewa się
+			if (L === 8) return 1
+			return L < 7 ? L + 1 : 99
+		}
+		slopeDist(x, y, z, step, from) {
+			let best = 1000
+			for (let i = 0; i < 4; i++) {
+				if (i === (from ^ 1)) continue
+				const nx = x + WATER_DIRS[i][0], nz = z + WATER_DIRS[i][1]
+				if (!this.waterPassable(nx, y, nz)) continue
+				if (this.isHole(nx, y - 1, nz)) return step
+				if (step < WATER_REACH) {
+					const r = this.slopeDist(nx, y, nz, step + 1, i)
+					if (r < best) best = r
+				}
+			}
+			return best
+		}
+		waterSpreadDirs(x, y, z) { // kierunki rozlewania: jeśli jest spadek w pobliżu, tylko ku niemu
+			const dist = [-1, -1, -1, -1]
+			let best = 1000
+			for (let i = 0; i < 4; i++) {
+				const nx = x + WATER_DIRS[i][0], nz = z + WATER_DIRS[i][1]
+				if (!this.waterPassable(nx, y, nz)) continue
+				dist[i] = this.isHole(nx, y - 1, nz) ? 0 : this.slopeDist(nx, y, nz, 1, i)
+				if (dist[i] < best) best = dist[i]
+			}
+			const out = []
+			for (let i = 0; i < 4; i++) if (dist[i] >= 0 && dist[i] === best) out.push(i)
+			return out
+		}
+		queueWater(x, y, z) {
+			if (this.waterAt(x, y, z) >= 0) this.waterQueue.set(x + "," + y + "," + z, [x, y, z])
+		}
+		queueWaterAround(x, y, z) {
+			this.queueWater(x, y, z)
+			for (const d of FIRE_DIRS) this.queueWater(x + d[0], y + d[1], z + d[2])
+		}
+		updateWater(x, y, z) {
+			const s = this.getBlock(x, y, z)
+			if ((s & 0xff) !== blockIds.waterBlock) return
+			if (!this.canWriteWater(x, z)) { // chunk jeszcze niegotowy: spróbuj później
+				const c = this.chunks[x >> 4] && this.chunks[x >> 4][z >> 4]
+				if (c) this.waterQueue.set(x + "," + y + "," + z, [x, y, z])
+				return
+			}
+			let L = (s >> 8) & 15
+
+			if (L !== 0) { // woda płynąca musi być zasilana
+				// nieskończone źródło: min. 2 źródła obok + stały grunt lub źródło pod spodem
+				let srcCount = 0
+				for (const d of WATER_DIRS) if (this.waterAt(x + d[0], y, z + d[1]) === 0) srcCount++
+				if (srcCount >= 2) {
+					const b = this.getBlock(x, y - 1, z)
+					const solid = b !== 0 && ((b & 0xff) === blockIds.waterBlock ? ((b >> 8) & 15) === 0 : !blockData[b].noCollide)
+					if (solid) {
+						this.setBlock(x, y, z, blockIds.waterBlock)
+						return
+					}
+				}
+				let want = 99
+				if (this.waterAt(x, y + 1, z) >= 0) {
+					want = 8
+				} else {
+					for (const d of WATER_DIRS) {
+						const e = this.waterEmit(x + d[0], y, z + d[1])
+						if (e < want) want = e
+					}
+				}
+				if (want === 99) { // brak zasilania: wysycha stopniowo
+					if (L === 7) { this.setBlock(x, y, z, 0); return }
+					want = L === 8 ? 7 : L + 1
+				}
+				if (want !== L) {
+					this.setBlock(x, y, z, blockIds.waterBlock | (want << 8))
+					L = want
+				}
+			}
+
+			// w dół
+			if (y > 1) {
+				const below = this.getBlock(x, y - 1, z)
+				if (below === 0) {
+					this.setBlock(x, y - 1, z, blockIds.waterBlock | (8 << 8))
+				} else if ((below & 0xff) === blockIds.waterBlock) {
+					const bl = (below >> 8) & 15
+					if (bl > 0 && bl < 8) this.setBlock(x, y - 1, z, blockIds.waterBlock | (8 << 8))
+				}
+			}
+
+			// na boki
+			const emit = this.waterEmit(x, y, z)
+			if (emit <= 7) {
+				for (const i of this.waterSpreadDirs(x, y, z)) {
+					const nx = x + WATER_DIRS[i][0], nz = z + WATER_DIRS[i][1]
+					if (!this.canWriteWater(nx, nz)) continue
+					const ns = this.getBlock(nx, y, nz)
+					if (ns === 0) {
+						this.setBlock(nx, y, nz, blockIds.waterBlock | (emit << 8))
+					} else if ((ns & 0xff) === blockIds.waterBlock) {
+						const nl = (ns >> 8) & 15
+						if (nl > emit && nl !== 8) this.setBlock(nx, y, nz, blockIds.waterBlock | (emit << 8))
+					}
+				}
+			}
+		}
+		waterTick() {
+			const now = Date.now()
+			if (now < this.nextWaterTick || !this.waterQueue.size) return
+			this.nextWaterTick = now + WATER_TICK
+			const batch = []
+			for (const [key, c] of this.waterQueue) {
+				batch.push(c)
+				this.waterQueue.delete(key)
+				if (batch.length >= 100) break
+			}
+			for (const c of batch) this.updateWater(c[0], c[1], c[2])
+		}
+
 		tick() {
 			let tickStart = win.performance.now()
 			let maxChunkX = (p.x >> 4) + settings.renderDistance
@@ -4030,6 +4617,8 @@ function MineKhan() {
 			for (let i = 0; i < this.sortedChunks.length; i++) {
 				this.sortedChunks[i].tick()
 			}
+			this.fireTick()
+			this.waterTick()
 
 			do {
 				let doneWork = false
@@ -4108,9 +4697,16 @@ function MineKhan() {
 			gl.uniform1f(glCache.uDist, fogDist)
 
 			let c = this.sortedChunks
+			gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE) // alfa obrazu zostaje 1
 			for (let chunk of c) {
 				chunk.render()
 			}
+			gl.depthMask(false) // woda nie zapisuje głębi
+			for (let i = c.length - 1; i >= 0; i--) {
+				c[i].renderWater() // od najdalszych
+			}
+			gl.depthMask(true)
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA) // przywróć zwykłe mieszanie dla HUD i ikon
 
 			gl.uniform3f(glCache.uPos, 0, 0, 0)
 
@@ -4375,7 +4971,9 @@ function MineKhan() {
 		//Update the velocity, rather than the position.
 		let co = Math.cos(p.ry)
 		let si = Math.sin(p.ry)
-		let friction = p.onGround ? 1 : 0.3
+		let friction = p.onIce ? 0.2 : (p.onGround ? 1 : 0.3)
+		p.inputX = co * move.x - si * move.z
+		p.inputZ = si * move.x + co * move.z
 		p.velocity.x += (co * move.x - si * move.z) * friction * dt
 		p.velocity.z += (si * move.x + co * move.z) * friction * dt
 
@@ -4928,7 +5526,15 @@ function MineKhan() {
 			return
 		}
 
+		if (p.underwater) {
+			ctx.fillStyle = "rgba(20, 70, 200, 0.35)"
+			ctx.fillRect(0, 0, width, height)
+		}
+
 		hotbar()
+		// ctx.textAlign = 'left'
+		// fill(255, 255, 255)
+		// text("fly:" + !!p.flying + " water:" + !!p.inWater + " web:" + !!p.inWeb + " ladder:" + !!p.onLadder + " ice:" + !!p.onIce + " ground:" + !!p.onGround, 5, 20)
 
 		let s = inventory.size
 		let x = width / 2 + 0.5
@@ -5152,6 +5758,7 @@ function MineKhan() {
 				block = world.getBlock(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) & 0x3ff
 				if (block === blockIds.oakDoorTop) block = blockIds.oakDoorBottom
 				if (block === blockIds.fire) block = blockIds.lighter
+				if ((block & 0xff) === blockIds.trapdoor) block = blockIds.trapdoor
 				index = inventory.hotbar.indexOf(block)
 				if (index >= 0) {
 					inventory.hotbarSlot = index
@@ -5177,7 +5784,7 @@ function MineKhan() {
 					}
 				}
 				holding = inventory.hotbar[inventory.hotbarSlot]
-				if (e.button === 2 && hitBox.pos && toggleDoor(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2])) {
+				if (e.button === 2 && hitBox.pos && (toggleDoor(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) || toggleTrapdoor(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]))) {
 					p.lastPlace = Date.now()
 				} else if (e.button === 2 && holding) {
 					place = true
@@ -5238,7 +5845,7 @@ function MineKhan() {
 				updateHUD = true
 			}
 
-			if (k === " " && !p.spectator) {
+			if (k === " " && !p.spectator && !p.onLadder) {
 				if (Date.now() < p.lastJump + 400) {
 					p.flying ^= true
 				} else {
@@ -5787,6 +6394,7 @@ function MineKhan() {
 		drawScreens.play = () => {
 			controls()
 			runGravity()
+			safeMediumPhysics()
 			resolveContactsAndUpdatePosition()
 
 			if (updateHUD) {
@@ -5861,6 +6469,11 @@ function MineKhan() {
 			strokeWeight(1)
 			clear()
 			ctx.drawImage(gl.canvas, 0, 0)
+
+			if (p.underwater) {
+				ctx.fillStyle = "rgba(20, 70, 200, 0.35)"
+				ctx.fillRect(0, 0, width, height)
+			}
 
 			textSize(60)
 			fill(0, 0, 0)
