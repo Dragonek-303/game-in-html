@@ -1095,6 +1095,8 @@ let textures = {
 	let superflat = false
 	let trees = true
 	let caves = true
+	let survival = false
+	let modeBtnCreate = null, modeBtnOptions = null
 
 	let blockIds = {}
 	blockData.forEach(block => blockIds[block.name] = block.id)
@@ -1224,6 +1226,7 @@ let textures = {
 		"loadsave menu": () => {},
 	}
 	let html = {
+		options: { onenter: () => syncModeButtons() },
 		pause: {
 			enter: [window.message],
 			exit: [window.savebox, window.saveDirections, window.message]
@@ -1274,6 +1277,7 @@ let textures = {
 			onenter: () => {
 				window.boxCenterTop.placeholder = currentLanguage === "English" ? "Enter World Name" : "Nowy Świat"
 				window.boxCenterTop.value = ""
+				syncModeButtons()
 			}
 		},
 		loading: {
@@ -1349,6 +1353,9 @@ let textures = {
 		hotbar: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
 		main: [],
 		hotbarSlot: 0,
+		counts: [0, 0, 0, 0, 0, 0, 0, 0, 0], // ilości w slotach (tylko survival)
+		owner: null,                          // świat, dla którego ekwipunek został już ustawiony
+		holdCount: 0,                         // ilość w przenoszonym stosie (ekwipunek kreatywny)
 		size: 40 * Math.min(width, height) / 600,
 		holding: 0,
 	}
@@ -2928,6 +2935,391 @@ let textures = {
 			if (!safeMediumPhysics.warned) { safeMediumPhysics.warned = true; console.error("mediumPhysics:", e) }
 		}
 	}
+	// ===== TRYB SURVIVAL =====
+	const MAX_HEALTH = 20        // 20 punktów = 10 serc
+	const MAX_AIR = 300          // 15 s powietrza (20 tików na sekundę)
+	const FALL_SAFE = 3          // bezpieczny upadek (bloki)
+	const BURN_TIME = 8000       // ms palenia po dotknięciu ognia
+	const HURT_INVULN = 500      // ms nietykalności po obrażeniach
+	const DEATH_TEXT = {
+		drown: ["You drowned", "Utonąłeś"],
+		fire: ["You burned to death", "Spłonąłeś"],
+		fall: ["You hit the ground too hard", "Spadłeś z wysokości"],
+		other: ["You died", "Zginąłeś"]
+	}
+	const HEART = ["011000110", "111101111", "111111111", "111111111", "111111111", "011111110", "001111100", "000111000", "000010000"]
+
+	function resetSurvivalState() {
+		p.health = MAX_HEALTH
+		p.air = MAX_AIR
+		p.burn = 0
+		p.burnTick = 0
+		p.dead = false
+		p.fallY = p.y
+		p.wasFlying = false
+		p.invulnUntil = 0
+		p.lastDamage = 0
+		p.hurtFlash = 0
+		p.flashing = false
+		p.survLast = 0
+		p.hudKey = ""
+		p.deathCause = "other"
+	}
+
+	// Jedyne miejsce zadawania obrażeń. Użyjesz go później też dla mobów: hurtPlayer(3, "mob")
+	function hurtPlayer(amount, cause) {
+		if (!survival || p.dead || p.spectator || amount <= 0) return
+		const now = Date.now()
+		if (now < p.invulnUntil) { // jak w Minecraft: w czasie nietykalności liczy się tylko nadwyżka
+			if (amount <= p.lastDamage) return
+			const extra = amount - p.lastDamage
+			p.lastDamage = amount
+			amount = extra
+		} else {
+			p.lastDamage = amount
+			p.invulnUntil = now + HURT_INVULN
+		}
+		p.health = Math.max(0, p.health - amount)
+		p.hurtFlash = now + 350
+		updateHUD = true
+		if (p.health <= 0) killPlayer(cause)
+	}
+
+	function killPlayer(cause) {
+		p.dead = true
+		p.health = 0
+		p.deathCause = cause
+		p.velocity.set(0, 0, 0)
+		for (const k in Key) Key[k] = false
+		changeScene("death")
+		releasePointer()
+	}
+
+	function respawn() {
+		const spawn = findSpawn()
+		p.x = spawn[0]
+		p.y = spawn[2]
+		p.z = spawn[1]
+		p.velocity.set(0, 0, 0)
+		p.sneaking = false
+		p.sprinting = false
+		p.speed = 0.075
+		p.bottomH = 1.62
+		p.flying = false
+		inventory.hotbar.fill(0)
+		inventory.counts.fill(0)
+		holding = 0
+		resetSurvivalState()
+		p.survWorld = world
+		changeScene("loading") // doczytuje chunki wokół punktu odrodzenia i sam wraca do gry
+	}
+
+	function survivalUpdate() {
+		syncInventory()
+		if (!survival || p.spectator) { p.survWorld = null; mineReset(); return }
+		if (p.survWorld !== world) { // nowy świat albo przełączenie trybu
+			resetSurvivalState()
+			p.survWorld = world
+			p.flying = false
+		}
+		const now = Date.now()
+		let dt = p.survLast ? now - p.survLast : 0
+		p.survLast = now
+		if (dt > 500) { p.fallY = p.y; dt = 0 } // po pauzie nie liczymy upadku
+		if (dt > 100) dt = 100
+		survivalMine(dt)
+
+		const wt = waterTop()
+		const feetY = p.y - p.bottomH
+		const inWater = wt !== null && feetY < wt - 0.2
+
+		// --- upadek: powyżej 3 bloków, 1 punkt za każdy kolejny blok ---
+		if (p.flying || p.wasFlying || wt !== null || p.inWeb || p.onLadder) {
+			p.fallY = p.y // woda, pajęczyna, drabina i lot niwelują upadek
+		} else if (p.onGround) {
+			const fall = p.fallY - p.y
+			if (fall > FALL_SAFE) hurtPlayer(Math.ceil(fall - FALL_SAFE), "fall")
+			p.fallY = p.y
+		} else if (p.y > p.fallY) {
+			p.fallY = p.y
+		}
+		p.wasFlying = !!p.flying
+		if (p.dead) return
+
+		// --- utonięcie: 15 s powietrza, potem 2 obrażenia co sekundę ---
+		if (p.underwater) {
+			p.air -= dt * 0.02
+			if (p.air <= -20) {
+				p.air = 0
+				hurtPlayer(2, "drown")
+				if (p.dead) return
+			}
+		} else if (p.air < MAX_AIR) {
+			p.air = Math.min(MAX_AIR, p.air + dt * 0.08) // szybki oddech po wynurzeniu
+		}
+
+		// --- ogień: podpalenie na 8 s, 1 obrażenie na sekundę, woda gasi ---
+		if (inWater) {
+			p.burn = 0
+		} else if (bodyState(blockIds.fire)) {
+			if (p.burn <= 0) {
+				p.burnTick = 0
+				p.burn = BURN_TIME
+				hurtPlayer(1, "fire")
+				if (p.dead) return
+			}
+			p.burn = BURN_TIME
+		}
+		if (p.burn > 0) {
+			p.burn -= dt
+			p.burnTick += dt
+			if (p.burnTick >= 1000) {
+				p.burnTick -= 1000
+				hurtPlayer(1, "fire")
+				if (p.dead) return
+			}
+			if (p.burn <= 0) { p.burn = 0; p.burnTick = 0 }
+		}
+
+		// --- odświeżanie HUD tylko gdy coś się zmieniło ---
+		const flash = now < p.hurtFlash
+		if (flash || p.flashing) updateHUD = true
+		p.flashing = flash
+		const key = Math.ceil(p.health) + "|" + Math.ceil(Math.max(0, p.air) / 30) + "|" + (p.burn > 0 ? 1 : 0)
+		if (key !== p.hudKey) { p.hudKey = key; updateHUD = true }
+	}
+
+	function drawHeart(x, y, px, amount) { // amount: 0 puste, 1 połowa, 2 pełne
+		ctx.fillStyle = "#000"
+		for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+			if (HEART[r][c] === "1") ctx.fillRect(x + c * px - 1, y + r * px - 1, px + 2, px + 2)
+		}
+		for (let r = 0; r < 9; r++) {
+			for (let c = 0; c < 9; c++) {
+				if (HEART[r][c] !== "1") continue
+				const lit = amount === 2 || (amount === 1 && c < 5)
+				ctx.fillStyle = lit ? ((r === 1 && c > 0 && c < 3) ? "#ff8a8a" : "#e11d1d") : "#3a3a3a"
+				ctx.fillRect(x + c * px, y + r * px, px, px)
+			}
+		}
+	}
+	function survivalOverlay() { // czerwony błysk i płomienie na ekranie
+		if (p.burn > 0) {
+			const g = ctx.createLinearGradient(0, height, 0, height * 0.45)
+			g.addColorStop(0, "rgba(255, 120, 0, 0.7)")
+			g.addColorStop(1, "rgba(255, 120, 0, 0)")
+			ctx.fillStyle = g
+			ctx.fillRect(0, 0, width, height)
+		}
+		if (Date.now() < p.hurtFlash) {
+			ctx.fillStyle = "rgba(255, 0, 0, 0.3)"
+			ctx.fillRect(0, 0, width, height)
+		}
+		fill(255, 255, 255)
+	}
+	function survivalBars() { // serca nad paskiem po lewej, bąbelki po prawej
+		const s = inventory.size
+		const px = Math.max(1.5, Math.round(s / 11) / 2)
+		const step = px * 8 + 1
+		const x0 = width / 2 - 4.5 * s + 25
+		const y = height - s * 1.5 - px * 9 - 6
+		const hp = Math.ceil(p.health)
+		for (let i = 0; i < 10; i++) {
+			const v = hp - i * 2
+			drawHeart(x0 + i * step, y, px, v >= 2 ? 2 : v === 1 ? 1 : 0)
+		}
+		if (p.air < MAX_AIR) {
+			const full = Math.ceil(Math.max(0, p.air) / 30)
+			const r = px * 4
+			ctx.lineWidth = 1.5
+			for (let i = 0; i < full; i++) {
+				const cx = x0 + 9 * s - r - i * step
+				ctx.beginPath()
+				ctx.arc(cx, y + r, r - 1, 0, Math.PI * 2)
+				ctx.fillStyle = "rgba(120, 190, 255, 0.55)"
+				ctx.fill()
+				ctx.strokeStyle = "#d6ecff"
+				ctx.stroke()
+			}
+		}
+		fill(255, 255, 255)
+	}
+
+	// ===== SURVIVAL: EKWIPUNEK I KOPANIE =====
+	const MAX_STACK = 32
+	const MINE_SCALE = 1.5 // sekundy kopania na 1 punkt twardości (większe = dłużej)
+	let survMining = false
+	const mine = { key: "", progress: 0, time: 1 }
+
+	// [wzór nazwy bloku, twardość, narzędzie, czy WYMAGA narzędzia]. Pierwszy pasujący wygrywa.
+	const BREAK_RULES = [
+		[/^(waterBlock|bedrock)$/, Infinity, null, false], // nie do wykopania
+		[/^(fire|torch)$/, 0, null, false],
+		[/eaves$/, 0.2, null, false],
+		[/lass$/, 0.3, null, false],
+		[/^(grass|dirt|sand|gravel|soulSand)$/, 0.55, "shovel", false],
+		[/Wool$/, 0.8, null, false],
+		[/(Planks|Log)$|^bookshelf$/, 2, "axe", false],
+		[/^(oakDoor|trapdoor)/, 3, "axe", false],
+		[/^ladder$/, 0.4, "axe", false],
+		[/^cobwebBlick$/, 4, "sword", false],
+		[/^iceBlick$/, 0.5, "pickaxe", false],
+		[/^(glowstone|netherrack)$/, 0.4, "pickaxe", false],
+		[/Ore$/, 3, "pickaxe", false],
+		[/^(coal|iron|gold|diamond|redstone|lapis|emerald)Block$|^ironBars$/, 5, "pickaxe", false],
+	]
+	const BREAK_DEFAULT = [1.8, "pickaxe", false] // reszta: kamienie, beton, cegły, kwarc...
+	const breakInfo = []
+	for (let i = 1; i < BLOCK_COUNT; i++) {
+		const n = blockData[i].name
+		const rule = BREAK_RULES.find(r => r[0].test(n)) || [null].concat(BREAK_DEFAULT)
+		breakInfo[i] = { hard: rule[1], tool: rule[2], need: rule[3] }
+	}
+
+	// Co wypada po wykopaniu. Domyślnie: ten sam blok.
+	const NO_DROP = /^(waterBlock|fire|bedrock|glass|blackStainedGlass|iceBlick|cobwebBlick)$|eaves$/
+	const DROP_OVERRIDE = { grass: "dirt", stone: "cobblestone", oakDoorTop: "oakDoorBottom" }
+	function blockDrop(state) {
+		const id = state & 0xff // odcina obrót, płytę, schody, otwarcie
+		const name = blockData[id].name
+		if (NO_DROP.test(name)) return 0
+		return DROP_OVERRIDE[name] ? blockIds[DROP_OVERRIDE[name]] : id
+	}
+
+	// --- HAKI POD NARZĘDZIA (na razie nic nie robią) ---
+	function heldTool() { return null }                    // np. "pickaxe", gdy trzymasz kilof
+	function toolSpeed(info, tool) { return 1 }            // mnożnik szybkości kopania
+	function canHarvest(info, tool) { return !info.need || info.tool === tool } // czy blok coś wyrzuci
+
+	function syncInventory() { // jeden wspólny ekwipunek dla obu trybów: ilości są te same w kreatywnym i w survivalu
+		const h = inventory.hotbar, c = inventory.counts
+		if (inventory.owner !== world) { // pierwsza klatka w nowym albo wczytanym świecie
+			inventory.owner = world
+			if (world.savedInv) {
+				h.fill(0)
+				c.fill(0)
+				world.savedInv.forEach((e, i) => {
+					if (i < 9 && e[0] && e[1] > 0) { h[i] = e[0]; c[i] = e[1] }
+				})
+			} else if (survival) { // nowy świat survival: pusty pasek
+				h.fill(0)
+				c.fill(0)
+			} else if (!h.some(Boolean)) { // kreatywny z pustym paskiem: domyślny pasek
+				for (let i = 0; i < 9; i++) { h[i] = i + 1; c[i] = 1 }
+			}
+			holding = h[inventory.hotbarSlot]
+			updateHUD = true
+		}
+		if (!survival) { // przedmiot w kreatywnym ma co najmniej 1 sztukę
+			for (let i = 0; i < 9; i++) if (h[i] && c[i] <= 0) c[i] = 1
+		}
+	}
+	function giveItem(id) { // zwraca false, gdy pasek jest pełny
+		const h = inventory.hotbar, c = inventory.counts
+		let slot = -1
+		for (let i = 0; i < 9; i++) if (h[i] === id && c[i] < MAX_STACK) { slot = i; break }
+		if (slot < 0) for (let i = 0; i < 9; i++) if (!h[i]) { slot = i; h[i] = id; c[i] = 0; break }
+		if (slot < 0) return false
+		c[slot]++
+		holding = h[inventory.hotbarSlot]
+		updateHUD = true
+		return true
+	}
+	function consumeItem(slot) {
+		const h = inventory.hotbar, c = inventory.counts
+		if (--c[slot] <= 0) { c[slot] = 0; h[slot] = 0 }
+		holding = h[inventory.hotbarSlot]
+		updateHUD = true
+	}
+	function removeOne(id) { // odejmuje 1 sztukę danego bloku z paska (najpierw z wybranego slotu)
+		const h = inventory.hotbar
+		if (h[inventory.hotbarSlot] === id) { consumeItem(inventory.hotbarSlot); return true }
+		for (let i = 0; i < 9; i++) if (h[i] === id) { consumeItem(i); return true }
+		return false
+	}
+	function invSaveString() { // "id-ilość" w base36, sloty oddzielone _
+		return inventory.hotbar.map((id, i) => id && inventory.counts[i] > 0 ? id.toString(36) + "-" + inventory.counts[i].toString(36) : "0").join("_")
+	}
+
+	function mineReset() {
+		if (mine.progress > 0) updateHUD = true
+		mine.key = ""
+		mine.progress = 0
+	}
+	function survivalMine(dt) { // wołane co klatkę; kopie blok na celowniku, dopóki trzymasz LPM
+		if (!Key.leftMouse || Key.control || !hitBox.pos || Date.now() - (p.lastAttack || 0) < 400) { mineReset(); return }
+		const x = hitBox.pos[0], y = hitBox.pos[1], z = hitBox.pos[2]
+		const state = world.getBlock(x, y, z)
+		const info = breakInfo[state & 0xff]
+		if (!state || !info || info.hard === Infinity) { mineReset(); return }
+		const key = x + "," + y + "," + z + "," + state
+		if (key !== mine.key) { mine.key = key; mine.progress = 0 } // zmiana celu zeruje postęp
+		if (Date.now() - p.lastBreak < 200) return // krótka przerwa po każdym wykopaniu
+		const tool = heldTool()
+		mine.time = info.hard * MINE_SCALE * 1000 / toolSpeed(info, tool)
+		mine.progress += dt
+		updateHUD = true
+		if (mine.progress < mine.time) return
+		const drop = canHarvest(info, tool) ? blockDrop(state) : 0
+		mine.key = ""
+		mine.progress = 0
+		survMining = true
+		changeWorldBlock(0)
+		survMining = false
+		if (drop) giveItem(drop)
+	}
+	function drawCounts() { // liczby sztuk na slotach paska (oba tryby)
+		const s = inventory.size
+		const x0 = width / 2 - 4.5 * s + 25, y0 = height - s * 1.5
+		ctx.font = "bold " + Math.round(s * 0.36) + "px Poppins"
+		ctx.textAlign = "right"
+		for (let i = 0; i < 9; i++) {
+			const n = inventory.counts[i]
+			if (!inventory.hotbar[i] || n <= 1) continue
+			const tx = x0 + (i + 1) * s - 3, ty = y0 + s - 4
+			ctx.fillStyle = "#000"
+			ctx.fillText(n, tx + 1, ty + 1)
+			ctx.fillStyle = "#fff"
+			ctx.fillText(n, tx, ty)
+		}
+		if (screen === "inventory" && inventory.holding && inventory.holdCount > 1) { // liczba przy przenoszonym stosie
+			ctx.fillStyle = "#000"
+			ctx.fillText(inventory.holdCount, mouseX + s / 2 + 1, mouseY + s / 2 + 1)
+			ctx.fillStyle = "#fff"
+			ctx.fillText(inventory.holdCount, mouseX + s / 2, mouseY + s / 2)
+		}
+		ctx.textAlign = "left"
+		textSize(10)
+		fill(255, 255, 255)
+	}
+	function survivalAfterHud() { // rysowane PO ikonach z WebGL, żeby liczby były na wierzchu
+		if (p.spectator) return
+		drawCounts()
+		if (survival && mine.key && mine.progress > 0) { // pasek postępu kopania pod celownikiem
+			const w = 60, k = Math.min(1, mine.progress / mine.time)
+			const bx = width / 2 - w / 2, by = height / 2 + 20
+			ctx.fillStyle = "rgba(0,0,0,0.6)"
+			ctx.fillRect(bx - 1, by - 1, w + 2, 7)
+			ctx.fillStyle = "#fff"
+			ctx.fillRect(bx, by, w * k, 5)
+		}
+		fill(255, 255, 255)
+	}
+
+
+	// Czy jakiś żywy mob zajmuje (choćby częściowo) komórkę bloku (x, y, z)?
+	function mobInBlock(x, y, z) {
+		if (!world || !world.mobs) return false
+		for (const m of world.mobs) {
+			if (m.dying !== undefined) continue
+			const hw = m.t.hw
+			if (m.x + hw > x - 0.5 && m.x - hw < x + 0.5 &&
+				m.z + hw > z - 0.5 && m.z - hw < z + 0.5 &&
+				m.y + m.t.h > y - 0.5 && m.y < y + 0.5 - 0.02) return true
+		}
+		return false
+	}
+
 	let resolveContactsAndUpdatePosition = function() {
 		let pminX = p2.x - 1
 		let pmaxX = p2.x + 1
@@ -3132,6 +3524,7 @@ let textures = {
 		return true
 	}
 	function changeWorldBlock(t) {
+		if (!t && survival && !survMining) return // w survivalu kopie tylko survivalMine()
 		let pos = hitBox.pos
 		if (!t && pos && isDoor(world.getBlock(pos[0], pos[1], pos[2]))) {
 			const old = world.getBlock(pos[0], pos[1], pos[2])
@@ -3165,7 +3558,7 @@ let textures = {
 			}
 		}
 	}
-	function newWorldBlock(click) {
+	function placeBlockRaw(click) {
 		if (!hitBox.pos || !holding) return
 		let pos = hitBox.pos, x = pos[0], y = pos[1], z = pos[2]
 		const target = world.getBlock(x, y, z) // blok, w który celujesz
@@ -3181,6 +3574,9 @@ let textures = {
 		}
 		const cur = world.getBlock(x, y, z)
 		if ((cur && (cur & 0xff) !== blockIds.waterBlock) || y <= 0 || y >= maxHeight - 1) return
+		// nie stawiaj bloków w mobach (jajka, zapalniczka i bloki bez kolizji są wyjątkiem)
+		if (holding !== blockIds.lighter && holding !== blockIds.pigEgg && holding !== blockIds.cowEgg && !blockData[holding].noCollide
+			&& (mobInBlock(x, y, z) || (holding === blockIds.oakDoorBottom && mobInBlock(x, y + 1, z)))) return
 
 		if (holding === blockIds.lighter) { // zapalniczka stawia ogień
 			world.setBlock(x, y, z, blockIds.fire)
@@ -3229,6 +3625,22 @@ let textures = {
 			pos[0] = x; pos[1] = y; pos[2] = z
 			const special = blockData[holding].special
 			changeWorldBlock(holding < 0xff && !special ? (holding | blockMode) : holding)
+		}
+	}
+
+	function newWorldBlock(click) {
+		if (!survival) return placeBlockRaw(click)
+		const slot = inventory.hotbarSlot
+		const id = inventory.hotbar[slot]
+		if (!id || inventory.counts[slot] <= 0 || p.dead) return
+		holding = id
+		const old = p.lastPlace
+		p.lastPlace = 0 // udane postawienie ustawia lastPlace, po tym poznajemy sukces
+		placeBlockRaw(click)
+		if (p.lastPlace) {
+			if (id !== blockIds.lighter) consumeItem(slot) // zapalniczka się nie zużywa
+		} else {
+			p.lastPlace = old
 		}
 	}
 
@@ -4243,6 +4655,68 @@ let textures = {
 			spawnMob(type, sx, g + 0.5, sz)
 		}
 	}
+
+	// ===== KOLIZJE GRACZ <-> MOB, MOB <-> MOB =====
+	const MOB_PUSH = 0.05        // jak mocno gracz spycha moby
+	const PLAYER_RESIST = 0.1    // jak mocno mob hamuje gracza (0 = gracz go nie czuje)
+	const MOB_SEPARATE = 0.04    // jak mocno moby odpychają się nawzajem
+	const MOB_PUSH_MAX = 0.12    // limit prędkości odrzutu
+
+	// Hak pod survival: wywoływany co klatkę, gdy gracz dotyka moba.
+	// nx, nz = kierunek od gracza do moba, overlap = głębokość wnikania.
+	// Tu później dodasz np. obrażenia od wrogich mobów.
+	function onPlayerTouchMob(m, nx, nz, overlap) {}
+
+	function clampKnock(v) {
+		return v > MOB_PUSH_MAX ? MOB_PUSH_MAX : v < -MOB_PUSH_MAX ? -MOB_PUSH_MAX : v
+	}
+	function mobCollisions(mobs, dt) {
+		const py0 = p.y - p.bottomH, py1 = p.y + p.topH
+		for (let i = 0; i < mobs.length; i++) {
+			const m = mobs[i]
+			if (m.dying !== undefined) continue
+
+			// gracz <-> mob
+			if (!p.spectator && py0 < m.y + m.t.h - 0.1 && py1 > m.y) {
+				let dx = m.x - p.x, dz = m.z - p.z
+				let d = Math.hypot(dx, dz)
+				const min = m.t.hw + p.w
+				if (d < min) {
+					if (d < 0.001) { // dokładnie w tym samym punkcie: pchnij w kierunku patrzenia
+						dx = p.direction.x
+						dz = p.direction.z
+						d = Math.hypot(dx, dz) || 1
+					}
+					const nx = dx / d, nz = dz / d, ov = min - d
+					m.kx = clampKnock(m.kx + nx * ov * MOB_PUSH * dt)
+					m.kz = clampKnock(m.kz + nz * ov * MOB_PUSH * dt)
+					if (!p.flying) { // gracz jest lekko hamowany przez moba
+						p.velocity.x -= nx * ov * PLAYER_RESIST * dt
+						p.velocity.z -= nz * ov * PLAYER_RESIST * dt
+					}
+					onPlayerTouchMob(m, nx, nz, ov)
+				}
+			}
+
+			// mob <-> mob (żeby się nie nakładały)
+			for (let j = i + 1; j < mobs.length; j++) {
+				const o = mobs[j]
+				if (o.dying !== undefined) continue
+				if (o.y >= m.y + m.t.h || m.y >= o.y + o.t.h) continue
+				let dx = o.x - m.x, dz = o.z - m.z
+				let d = Math.hypot(dx, dz)
+				const min = m.t.hw + o.t.hw
+				if (d >= min) continue
+				if (d < 0.001) { dx = Math.random() - 0.5; dz = Math.random() - 0.5; d = Math.hypot(dx, dz) || 1 }
+				const nx = dx / d, nz = dz / d, ov = (min - d) * MOB_SEPARATE * dt
+				m.kx = clampKnock(m.kx - nx * ov)
+				m.kz = clampKnock(m.kz - nz * ov)
+				o.kx = clampKnock(o.kx + nx * ov)
+				o.kz = clampKnock(o.kz + nz * ov)
+			}
+		}
+	}
+
 	function updateMobs() {
 		const now = Date.now()
 		let dt = (now - (world.lastMobTick || now)) / 33
@@ -4378,6 +4852,7 @@ let textures = {
 			m.amp += ((moving ? 1 : 0) - m.amp) * 0.2 * dt
 			if (moving) m.anim += (m.panic > 0 ? 0.5 : 0.25) * dt
 		}
+		mobCollisions(mobs, dt)
 	}
 	function renderMobs() {
 		const mobs = world.mobs
@@ -4469,6 +4944,7 @@ let textures = {
 		}
 		if (!best) return false
 		best.hp--
+		p.lastAttack = Date.now()
 		best.panic = 2500
 		const ax = best.x - p.x, az = best.z - p.z, l = Math.hypot(ax, az) || 1
 		best.kx = ax / l * 0.18
@@ -5106,11 +5582,11 @@ let textures = {
 			blocks.forEach((block, index) => pallete[block] = index)
 
 			let rnd = Math.round
-			let options = p.flying | superflat << 1 | p.spectator << 2 | caves << 3 | trees << 4
+			let options = p.flying | superflat << 1 | p.spectator << 2 | caves << 3 | trees << 4 | (survival ? 1 : 0) << 5
 
 			let str = world.name + ";" + worldSeed.toString(36) + ";"
 				+ rnd(p.x).toString(36) + "," + rnd(p.y).toString(36) + "," + rnd(p.z).toString(36) + ","
-				+ (p.rx * 100 | 0).toString(36) + "," + (p.ry * 100 | 0).toString(36) + "," + options.toString(36) + ";"
+				+ (p.rx * 100 | 0).toString(36) + "," + (p.ry * 100 | 0).toString(36) + "," + options.toString(36) + "," + invSaveString() + ";"
 				+ version + ";"
 				+ blocks.map(b => b.toString(36)).join(",") + ";"
 
@@ -5157,6 +5633,14 @@ let textures = {
 			superflat = options >> 1 & 1
 			caves = options >> 3 & 1
 			trees = options >> 4 & 1
+			survival = !!(options >> 5 & 1)
+			this.savedInv = null
+			if (playerData[6]) {
+				this.savedInv = playerData[6].split("_").map(s => {
+					const a = s.split("-")
+					return [parseInt(a[0], 36) || 0, parseInt(a[1], 36) || 0]
+				})
+			}
 
 			let version = data.shift()
 			this.version = version
@@ -5511,7 +5995,7 @@ let textures = {
 		const compact = touchMode && height < 520 // niski ekran telefonu
 		const BH = compact ? 34 : 40
 		const PY = i => compact ? 85 + i * 40 : 225 + i * 50
-		const OY = i => compact ? 40 + i * 40 : [125, 185, 245, 305, 365, 415, 465][i]
+		const OY = i => compact ? 40 + i * 40 : [100, 150, 200, 250, 300, 350, 400, 450][i]
 
 		// Main menu buttons
 		Button.add(width / 2, height / 2 - 20, 400, 40, "Singleplayer", "main menu", r => changeScene("loadsave menu"))
@@ -5534,7 +6018,10 @@ let textures = {
 			}
 			return superflat
 		})
-		Button.add(width / 2, 285, 300, 40, currentLanguage === "English" ? "Game Mode: Creative" : "Tryb Gry: Kreatywny", "creation menu", nothing, always, currentLanguage === "English" ? "Not available" : "Nie dostępny")
+		Button.add(width / 2, 285, 300, 40,
+			currentLanguage === "English" ? ["Game Mode: Creative", "Game Mode: Survival"] : ["Tryb Gry: Kreatywny", "Tryb Gry: Przetrwanie"],
+			"creation menu", r => { survival = (r === "Game Mode: Survival" || r === "Tryb Gry: Przetrwanie") })
+		modeBtnCreate = Button.all[Button.all.length - 1]
 		Button.add(width / 2, 335, 300, 40, currentLanguage === "English" ? "Difficulty: Peaceful" : "Poziom trudności: Pokojowy", "creation menu", nothing, always, currentLanguage === "English" ? "Not available" : "Nie dostępny")
 		Button.add(width / 2, height - 90, 300, 40, currentLanguage === "English" ? "Create New World" : "Stwórz Nowy Świat", "creation menu", r => {
 			worldSeed = Math.random() * 2000000000 | 0
@@ -5639,7 +6126,12 @@ let textures = {
 			}).catch(e => console.error(e))
 		})
 		Button.add(mid, height / 2 + 50, w2, 40, currentLanguage === "English" ? "Back" : "Powrót", "editworld", r => changeScene(previousScreen))
-
+		// Death screen buttons
+		Button.add(width / 2, height / 2 + 20, 300, 40, currentLanguage === "English" ? "Respawn" : "Odrodź się", "death", respawn)
+		Button.add(width / 2, height / 2 + 70, 300, 40, currentLanguage === "English" ? "Title Screen" : "Menu główne", "death", r => {
+			initWorldsMenu()
+			changeScene("main menu")
+		})
 		// Pause buttons
 		Button.add(width / 2, PY(0), 300, BH, currentLanguage === "English" ? "Resume" : "Powrót do gry", "pause", play)
 		Button.add(width / 2, PY(1), 300, BH, currentLanguage === "English" ? "Options" : "Opcje", "pause", r => changeScene("options"))
@@ -5664,7 +6156,7 @@ let textures = {
 		})
 		
 		// Options buttons
-		Button.add(width / 2, OY(6), width / 3, BH, currentLanguage === "English" ? "Back" : "Powrót", "options", r => changeScene(previousScreen));
+		Button.add(width / 2, OY(7), width / 3, BH, currentLanguage === "English" ? "Back" : "Powrót", "options", r => changeScene(previousScreen));
 
 		let langBtn = Button.add(width / 2, OY(0), width / 3, BH, ["English", "Polski"], "options", r => {
 			currentLanguage = r;
@@ -5721,7 +6213,18 @@ let textures = {
 			updateTouchUI()
 		})
 		Button.all[Button.all.length - 1].index = Math.max(0, ctrlModes.indexOf(localStorage.getItem("controls") || "auto"))
+		Button.add(width / 2, OY(6), width / 3, BH,
+			currentLanguage === "English" ? ["Game Mode: Creative", "Game Mode: Survival"] : ["Tryb Gry: Kreatywny", "Tryb Gry: Przetrwanie"],
+			"options", r => {
+				survival = (r === "Game Mode: Survival" || r === "Tryb Gry: Przetrwanie")
+				if (p) p.survWorld = null // survivalUpdate odnowi życie i wyłączy lot
+				updateHUD = true
+			},
+			() => previousScreen !== "pause",
+			() => previousScreen !== "pause" ? (currentLanguage === "English" ? "Available only in a running world." : "Dostępne tylko w uruchomionym świecie.") : "")
+		modeBtnOptions = Button.all[Button.all.length - 1]
 
+		syncModeButtons()
 		updateButtonLabels();
 	}
 
@@ -5731,6 +6234,10 @@ let textures = {
 				btn.index = currentLanguage === "English" ? 0 : 1;
 			}
 		}
+	}
+	function syncModeButtons() {
+		if (modeBtnCreate) modeBtnCreate.index = survival ? 1 : 0
+		if (modeBtnOptions) modeBtnOptions.index = survival ? 1 : 0
 	}
 
 	function initTextures() {
@@ -5864,7 +6371,9 @@ let textures = {
 			ctx.fillRect(0, 0, width, height)
 		}
 
+		if (survival) survivalOverlay()
 		hotbar()
+		if (survival) survivalBars()
 		// ctx.textAlign = 'left'
 		// fill(255, 255, 255)
 		// text("fly:" + !!p.flying + " water:" + !!p.inWater + " web:" + !!p.inWeb + " ladder:" + !!p.onLadder + " ice:" + !!p.onIce + " ground:" + !!p.onGround, 5, 20)
@@ -6020,8 +6529,9 @@ let textures = {
 		hotbar()
 		//hud()
 		ctx.drawImage(gl.canvas, 0, 0)
+		drawCounts()
 	}
-	function clickInv() {
+	function clickInv(button, shift) {
 		const list = invList()
 		let s = inventory.size
 		let s2 = s / 2
@@ -6032,13 +6542,36 @@ let textures = {
 		let y = height - s * 1.5
 		let overHot = (mouseX - x) / s | 0
 		if (mouseX < x + 9 * s && mouseX > x && mouseY > y && mouseY < y + s) {
-			let temp = inventory.hotbar[overHot]
-			inventory.hotbar[overHot] = inventory.holding
-			inventory.holding = temp
+			if (button === 2 && !inventory.holding) { // PPM na slocie bez niczego w ręce: -1 sztuka
+				if (inventory.hotbar[overHot]) consumeItem(overHot)
+			} else if (inventory.holding && inventory.hotbar[overHot] === inventory.holding) { // ten sam blok: dokładanie do stosu
+				const add = Math.min(MAX_STACK - inventory.counts[overHot], inventory.holdCount || 1)
+				inventory.counts[overHot] += add
+				inventory.holdCount = (inventory.holdCount || 1) - add
+				if (inventory.holdCount <= 0) { inventory.holding = 0; inventory.holdCount = 0 }
+			} else { // inny blok albo pusty slot: zamiana z tym, co jest w ręce
+				const tid = inventory.hotbar[overHot], tc = inventory.counts[overHot]
+				inventory.hotbar[overHot] = inventory.holding
+				inventory.counts[overHot] = inventory.holding ? (inventory.holdCount || 1) : 0
+				inventory.holding = tid
+				inventory.holdCount = tc
+			}
+			holding = inventory.hotbar[inventory.hotbarSlot]
+			updateHUD = true
 		} else if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
-			inventory.holding = list[over]
+			if (button === 2) { // PPM: -1 z przenoszonego stosu
+				if (inventory.holding === list[over] && inventory.holdCount > 0) {
+					if (--inventory.holdCount <= 0) { inventory.holding = 0; inventory.holdCount = 0 }
+				}
+			} else if (inventory.holding === list[over]) { // LPM na tym samym bloku: +1
+				if (inventory.holdCount < MAX_STACK) inventory.holdCount++
+			} else { // nowy blok trafia do kursora
+				inventory.holding = list[over]
+				inventory.holdCount = 1
+			}
 		} else {
 			inventory.holding = 0
+			inventory.holdCount = 0
 		}
 
 		drawScreens.inventory()
@@ -6098,7 +6631,7 @@ let textures = {
 				break
 			case 1:
 				Key.middleMouse = true
-				if (!hitBox.pos) break
+				if (!hitBox.pos || survival) break
 				updateHUD = true
 				block = world.getBlock(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) & 0x3ff
 				if (block === blockIds.oakDoorTop) block = blockIds.oakDoorBottom
@@ -6109,6 +6642,7 @@ let textures = {
 					inventory.hotbarSlot = index
 				} else {
 					inventory.hotbar[inventory.hotbarSlot] = block
+					inventory.counts[inventory.hotbarSlot] = 1
 				}
 				break
 			case 2:
@@ -6139,7 +6673,7 @@ let textures = {
 				}
 			}
 		} else if (screen === "inventory") {
-			clickInv()
+			clickInv(e.button, Key.shift)
 		}
 
 		Button.click()
@@ -6185,14 +6719,14 @@ let textures = {
 				changeScene("pause")
 			}
 
-			if(k === "b") {
+			if(k === "b" && !survival) {
 				p.autoBreak = !p.autoBreak
 				updateHUD = true
 			}
 
 			if (k === " " && !p.spectator && !p.onLadder) {
 				if (Date.now() < p.lastJump + 400) {
-					p.flying ^= true
+					if (!survival) p.flying ^= true
 				} else {
 					p.lastJump = Date.now()
 				}
@@ -6212,14 +6746,14 @@ let textures = {
 				p.bottomH = 1.32
 			}
 
-			if (k === "l") {
+			if (k === "l" && !survival) {
 				p.spectator = !p.spectator
 				p.flying = true
 				p.onGround = false
 				updateHUD = true
 			}
 
-			if (k === "e") {
+			if (k === "e" && !survival) {
 				changeScene("inventory")
 				releasePointer()
 			}
@@ -6684,6 +7218,7 @@ let textures = {
 		superflat = false
 		trees = true
 		caves = true
+		survival = false
 	}
 	// ===== STEROWANIE DOTYKOWE =====
 	const TOUCH_LOOK = 2.2 // im więcej, tym szybszy obrót palcem
@@ -6948,6 +7483,8 @@ let textures = {
 			runGravity()
 			safeMediumPhysics()
 			resolveContactsAndUpdatePosition()
+			try { survivalUpdate() } catch (e) { console.error("survival:", e) }
+			if (screen !== "play") return // gracz właśnie zginął
 
 			if (updateHUD) {
 				clear()
@@ -6955,6 +7492,7 @@ let textures = {
 				gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 				hud()
 				ctx.drawImage(gl.canvas, 0, 0)
+				survivalAfterHud()
 				updateHUD = false
 				freezeFrame = false
 
@@ -7051,6 +7589,21 @@ let textures = {
 			text(currentLanguage === "English" ? "Select World" : "Wybierz świat", width / 2, 20)
 		}
 		drawScreens.editworld = dirt
+		drawScreens.death = () => {
+			strokeWeight(1)
+			clear()
+			ctx.drawImage(gl.canvas, 0, 0)
+			ctx.fillStyle = "rgba(110, 0, 0, 0.6)"
+			ctx.fillRect(0, 0, width, height)
+			const pl = currentLanguage !== "English"
+			ctx.textAlign = "center"
+			fill(255)
+			ctx.font = "bold " + Math.min(64, Math.round(width / 9)) + "px Poppins"
+			text(pl ? "Zginąłeś!" : "You died!", width / 2, height / 2 - 70)
+			textSize(20)
+			const d = DEATH_TEXT[p.deathCause] || DEATH_TEXT.other
+			text(d[pl ? 1 : 0], width / 2, height / 2 - 30)
+		}
 	})()
 
 	// Give the font time to load and redraw the homescreen
