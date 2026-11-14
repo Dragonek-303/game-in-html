@@ -4,6 +4,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<title>Minecraft</title>
 
 	</head>
@@ -91,6 +92,10 @@
 			color: white;
       font-family: 'Poppins', sans-serif;
 		}
+		#overlay {
+			touch-action: none;
+			-webkit-tap-highlight-color: transparent;
+		}
 	</style>
 	<body>
 	<canvas id="overlay" tabindex="0" width="600" height="600" style="position: absolute; top: 0px; left: 0px"></canvas>
@@ -135,6 +140,7 @@
 		#endif
 
 		uniform sampler2D uSampler;
+		uniform float uHurt;
 		varying float vShadow;
 		varying vec2 vTexture;
 		varying float vFog;
@@ -148,7 +154,9 @@
 
 		void main(void){
 			vec4 color = texture2D(uSampler, vTexture);
-			gl_FragColor = fog(vec4(color.rgb * vShadow, color.a));
+			vec3 rgb = color.rgb * vShadow;
+			rgb = mix(rgb, vec3(1.0, 0.15, 0.15), uHurt * 0.6);
+			gl_FragColor = fog(vec4(rgb, color.a));
 			if (gl_FragColor.a == 0.0) discard;
 		}
 	</script>
@@ -254,71 +262,12 @@ function MineKhan() {
 			gl.texSubImage2D(gl.TEXTURE_2D, 0, (n & 15) * 16, (n >> 4) * 16, 16, 16, gl.RGBA, gl.UNSIGNED_BYTE, animTile)
 		}
 	}
-	let textures = {
-		grassTop: function(n) {
-			let r = 0, g = 0, b = 0, d = 0
-			for (let x = 0; x < 16; x++) {
-				for (let y = 0; y < 16; y++) {
-					d = Math.random() * 0.25 + 0.65
-					r = 0x54 * d
-					g = 0xa0 * d
-					b = 0x48 * d
-					setPixel(n, x, y, r, g, b)
-				}
-			}
-		},
-		grassSide: function(n) {
-			let r = 0, g = 0, b = 0, d = 0
-			let pix = getPixels("0g0g70ordrzz0u30g730wa4vzz0xnyl8f11lrk7315qj7jz1fh47pb6553365533033636350335403653650063306333633300635163503655353653535605335031350330553500033033366333433663663535336655335055335553353530355333033503300333336635353663650660554353355635155305303053556333333366353323553060365553063030663533555365534355335530")
-			for (let i = 0; i < pix.length; i += 4) {
-				setPixel(n, i >> 2 & 15, i >> 6, pix[i], pix[i+1], pix[i+2], pix[i+3])
-			}
-			for (let x = 0; x < 16; x++) {
-				let m = Math.random() * 4 + 1
-				for (let y = 0; y < m; y++) {
-					d = Math.random() * 0.25 + 0.65
-					r = 0x54 * d
-					g = 0xa0 * d
-					b = 0x48 * d
-					setPixel(n, x, y, r, g, b)
-				}
-			}
-		},
-		leaves: function(n) {
-			let r = 0, g = 0, b = 0, a = 0
-			for (let x = 0; x < 16; x++) {
-				for (let y = 0; y < 16; y++) {
-					r = 0
-					g = Math.floor(Math.random() * 30 + 100)
-					b = Math.floor(Math.random() * 30)
-					if (Math.random() < 0.35) {
-						a = 0
-					} else {
-						a = 255
-					}
-					setPixel(n, x, y, r, g, b, a)
-				}
-			}
-		},
-		oakPlanks: function(n) {
-			let r = 0
-			for (let y = 0; y < 16; y++) {
-				let a = (y & 3) === 3 ? 0.7 : 1
-				for (let x = 0; x < 16; x++) {
-					let mid = x === 8 && (y & 7) > 3 && a === 1 ? 0.85 : 1
-					let rit = x === 15 && (y & 7) < 3 && a === 1 ? 0.85 : 1
-					r = (Math.random() * 0.1 + 0.9) * a * mid * rit
-					setPixel(n, x, y, 190 * r, 154 * r, 96 * r)
-				}
-			}
-		},
-		hitbox: function(n) {
-			for (let x = 0; x < 16; x++) {
-				for (let y = 0; y < 16; y++) {
-					setPixel(n, x, y, 255, 255, 0, 255)
-				}
-			}
-		},
+let textures = {
+		grassTop: "0g0gz0f3gf0f0f3gf7j0fdhf5r0fnifb30fnl8fz0fxm8lb0g7n8jj0g7onb30ghpn9b0ghr20v0grs1z30h1ugov0h1vvgf0hbwven0hm0oov0hw1ou70i643jz0i65i4f0ig6i2n0ig7wu70iq8wsf0iqabjz0j0bbi70j0cq9r0jadq7z0jkg4xr0juh4vz0juijnj0k4jjlr0k4kydb0kelybj0kend330kood1b0koprsv0kyqrr3yflfeafj34k552efbbwa3pdlbwmpo32ifpcadx96je865lplrt8gy6a2arj6332lgl0oytyykayieo4fcpnbpwf2xf72iwft3qr3ah6mr0fm10qtpm2t012xr7mamtpnyfjejjdpp5dwdympr3ou5oaddg5yjf8bfbw5gme3wnowoidaw8216kakt0weg389upi7rwrdekprpwqgx4vpvrb0lwul29m4laje9yxlugrdad4892sopurjtgj555tp",
+		grassSide: "0g0gz0f3gf0f0fdhf5r0fnjtvj0fxm8lb0g7n8jj0g7onb30g7q1vj0grtgqn0hby9z30hw0a2n0hw1ou70hw33en0i643cv0i65i4f0ig6i2n0ig6i9r0iq8wsf0jadq7z0jkeqdb0jkhji70juijnj0k4jjlr0k4kydb0kelybj0kend330kood1b0koprsv0kyqrr30ordrzz0u30g730wa4vzz0xnyl8f11lrk7315qj7jz1fh47pbp2i2koo7h8d10ej6hpbpl18p2rgm2o91yvinyvcvqrk2h4yaxt3pxsfyxxviimx5xvx7sxvvxsvrvxsvvsxxvxsssvvsvvvyyvvvwvvyyvyyvxvxvvyyxxvvxsxxvvxxxvvxvxvsvxxvvvsvvxsvvssvvvvvyyvxvxvyyvyxsyysxxwvxvvxxyvxtxxvsxvsvsxvxxyvvvvvvvyyvxvvuvxxvsysvyxxxvsyvsvsyyvxvvxxxvyxxvwvxxvvxxvs",
+		leaves: "0g0gz0000000003wgzj003whrz003wk5b003y0vz003zegv004251b0043kzj0044x6n0046ewv0047rpb0047v2700495hb004anlr004derj004eubj004g73z004g9of004hkov004j1fj004khz3004lrsv004n85b004n9q7004q22n004rfgf004ritb004ss1r004ubcv004vmrj004x2wv004zv9b004zwn3005188v0051csfo0ga0rpi30s4000000he0p40o40v80ahuq030h03or0r0t6j60h08p000p1v00n7d0vs40fyrp00k00ews500wke040iv8d0d85ysh13x0arjwrvwmu7s40k0w5pi0yp0iejess000200c0k8wds00arq0s0t00qq3p0508000s6wwj400spi2kqs00m0300a0000o0i7ji750qmm0w90w8nib0s0cv03prwdx0v810a0l0k000b00k0dg00m0k0",
+		oakPlanks: "0g0gz0xefv270xogv7j0xyhvcv0yiigov0ysjgu70z2kgsf0zclgxr0zmmgvz0zwm2gv106n2f310go2kf10qp2in14myvi714wzvnj15r2vwf16b3h8f16l4hdr16v5hbz17f7hmn18ja39b1bliakf1bvhw5b1c5iw3j1cfjw8v1cpkw731czlwcf1djmhvj1e3ohz31edphxb1enp3i71exq3gf1fhs3jz1g1sp331gbtp8f1glup6nvnvqqqkvrxuquryfuvpxvnoovxqstxpeqlwttkvslwurkluj531455560a058001ovruoussewxymwplrvqqmmqtgxxrmvswyvmkxnsteswkknwo380003b172215810qpqlqvnypvtvoowinqqvwpwvwrqqqlngqqxvtlwnorsowvmha622060961019a80mqmyqmstcwlqusnuxyvyowvwdlkmonyyuoumvnukgvqmvvyla6348043562894b0",
+		hitbox: "0g0g11z12nlr0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 		dirt: "0g0g70ordrzz0u30g730wa4vzz0xnyl8f11lrk7315qj7jz1fh47pb6553365533033636350335403653650063306333633300635163503655353653535605335031350330553500033033366333433663663535336655335055335553353530355333033503300333336635353663650660554353355635155305303053556333333366353323553060365553063030663533555365534355335530",
 		stone: "0g0gf0v74dmg0v74f7c0xf169k0xf17ug0xfcet40xfcge00xfchyw0xfnoxk0zn97g80zn99140znkfzs0znkhko0znkj5k11vh8mw11vsirc5548515111111551595851111155b55155558535155bb555555556556b55bb55b5b85bbb56535bbbbbbbbbcb5b5bbbb6bebbeebebbbbbbbbbeebbebbbbeebb5b1beeeeb555bb555b5a5deebbbbbbb55bbbbeeebb558b555bbabdeebbb51b5551babeebbbb559555555beeb115b15555515552555bb5a5b751051241bb1555551",
 		logSide: "0g0gx06ocs1k06octmg08w9j3s08wkt880b4hkag0b4ssu00b4suew0dcpjw80dcplh40dd0u0o0dd0vlk0fkxl2w0fkxmns0fl8v7c0ht5koo0ht5m9k0ht5nug0htgwe00k1dng80k1dp140k1oxko0m9aeig0m9ag3c0m9ln200m9lomw0ohifp40ohto8o0ohtptk0qpqfaw0qpqgvs0qq1pfc0sxyghk0sxyi2g89ocopmioi3difc581i9sgldof3d5d3633igqctbof3c8q3546ggqcvfi3ogct8546iciutflfrifo85b8rckpq6oftodd63e91dgct8rduhcdc6bdbflqoitafaihc80gbnloiqrgciiic97gbnfqrik9fgiof8569icorir6ogar642dfriourodji8qc008i8powirgoicod30co9ikuqhiqdck333do8foitcgocfgd69dociq9riofchfd3",
@@ -419,109 +368,41 @@ function MineKhan() {
 		polishedAndesite: "0g0g90oilzi70sz23gf0v7a3270yjgjcv10ru60v11vyakf11w3ugv19okmwv1e4v30f7878888888788785843334442443134084444443376644307416763343446440844442456433334083344333424433318444634666554320833433332123444184562444466776608434433443344540844667633366444081444444664466208466654333134760844433334465334083333664444334406100000000110000",
 		polishedDiorite: "0g0g80qqu0ov0xfi5tr11vy6m71asubcv1f94t1b1jpkttr1o60w731ri7bpb7776677777666774764556657643564166764466577434506565333565454441675334576435457176544567733456607566767655346450744765756564534063556655467534516566544565544761664334655465666075673555775644517557654375466340745654576435744072445566545654512101110001100110",
 		polishedGranite: "0g0g90l56fi70plgu0v0yhw0sf1424tmn17eb8cf1aqna4f1e3al8f1e3x7un1jnje2n8888786866866565843344345444334374744554442446418444243334553342844444453344443262343344443734428345543644444431844444423445544263422344554433636444433443344442734444444464334284473344244442318455444445543341633443264434455264443444334447412111001110111100",
-    sandStoneSide: "0g0gh18jtywo1f86tx41hgetiw1hgq22g1hgq3nc1jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1lwuvw81lwuxh41lx660o1lx67lk1lxhg541o5e8s800000000000dd000946430b99b09c02b000000490000000099d0100009b0b86899b0ddd90990686b00d0ddd9000000003000000000dd90502478bd0880ddd0000099690e90aadda0b09b940000daeee0d0ddcddde0ceedf0e000000000000000dcdfg0e09eadddd0000df0d00000000099000090de0dc0d0aa9c0000cd0ad0d0",
-    sandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
-    smoothSandStoneSide: "0g0gz18jtywo18ju0hk18k59141arqpyw1arqrjs1as203c1as21o81asda7s1d0a1a01d0a2uw1f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lk1o52yns1o5e77c1o5e8s81o5phbs1qdm8e01qdm9ywvvvvvvvvruuuvuvvrlrlnrsrlfkoorss6256669986662556wwvwursvwyvvuuusvrlmpmprpmlmppr6vsrrpllmlllrrrr8xrpplrpijllllcl8vrllrrpilliliac5vglmmlllmlfccfl6ulllldbllffidil6uillidielffic8e5ulllkifikioploi6tklkeiflliorroq5rillllkdffrooor5ukloihdcdflfeif3l899900415558765",
-    smoothSandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
-    chiseledSandStoneSide: "0g0gt16blzaw1as203c1d0a1a01d0a2uw1f8i2go1f8i41k1hgetiw1hgev3s1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lk1lxhg541o52x2w1o52yns1o5e77c1o5e8s81o5phbs1qdm9ywqqqqqqqqkpppqpqqkfkfgklkf9ehhkll0000000000000000qrqrpilqrsqqpppq00000000000000000aak099k059k0990040k0d0k070k02000300090007000100f9ffffa9ff9246ef0000000000000000pmppoknkokkoifklffffec9cechifhcf9efe8c9ffchkkhj96cffffe699khhhkceefheb6469f98c980000000000000000",
-    chiseledSandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
-    ironBarsSide: "0g0g200000000sywflk0010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100001000001000010011111111111111110010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100",
-    ironBarsTop: "0g0g100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-	waterBlock: function(n) {
-		for (let y = 0; y < 16; y++) {
-			for (let x = 0; x < 16; x++) {
-				// okresowy wzór: lewa krawędź = prawa, góra = dół, więc bloki łączą się bez szwów
-				const w = Math.sin(x * Math.PI / 4 + Math.sin(y * Math.PI / 8) * 1.5) * Math.sin(y * Math.PI / 4 + Math.sin(x * Math.PI / 8) * 1.5)
-				const d = 0.92 + w * 0.05
-				setPixel(n, x, y, 40 * d, 100 * d, 220 * d, 200) // ostatnia liczba = przezroczystość (255 = pełna)
-			}
-		}
-	},
-	altLeavesSide: "0g0gr029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k20auw0k5fqig0k5qz200k6296g11vskc8j9dck8cpj31111ch1111112doeoj1111114on11111bi0dpl14dfo15gj30111fj060111ceo4311314mmmmmmmmmmmmmmmmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmmmmmmmmmmmmmmmm113dc441111cceo0dol10fnp336111344dk231dh151dno11o41jk11476achk3k",
-    altLeavesTop: "0g0gp029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k5fqig0k5qz200k6296gj9dck8coj31111ch1111112dnenj1111114nm11111bi0dol14dfn15gj30111fj060111cen4311314hbjm121341cjmn3111cn14hfmj63bj113111111ddk111011k101kk41113fkh4an83cfk1ek1hchk21331111ddo91137111deek1113141nnn1113dc441111ccen0dnl10fmo336111344dk231dh151dmn11n41jk11476achk3k",
-    oakDoorTip: "0g0ga04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4hlvc0b4suew0dcplh40xfchyo8887775544442110874444432221101184444444444221418547559999444242844755999944224284469999999922428447999999992242844799999999224284479999999922428447999999992242844599999999224284459999999922428445999999992242844599999999224274449999999922427444999999992242",
-    oakDoorBittim: "0g0gb02881dk04g4sfs04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4suew0xfchyo1d0kx6g86469999999944648646999999994a6486469999999944448646999999994364764699999999436474469999999933646446999999993364643699999999335364369999999933536334999999993343633499999999324343249999999922424223999999992232311333999922223221122299992211311001111111111121",
-    justLeaves: "0g0gp029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k5fqig0k5qz200k6296gj9dck8coj31111ch1111112dnenj1111114nm11111bi0dol14dfn15gj30111fj060111cen4311314hbjm121341cjmn3111cn14hfmj63bj113111111ddk111011k101kk41113fkh4an83cfk1ek1hchk21331111ddo91137111deek1113141nnn1113dc441111ccen0dnl10fmo336111344dk231dh151dmn11n41jk11476achk3k",
-    oakDoorBittimboi: "0g0gb02881dk04g4sfs04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4suew0xfchyo1d0kx6g864699999999446486a699999999436486469999999944448646999999994364764699999999436474469999999933646446999999993364643699999999335364369999999933536334999999993343633499999999324343249999999922424223999999992232311333999922223221122299992211311001111111111121",
-    dispenserBlick: "0g0gt000006w06oo26006oo3qw0hts83c0k209a00k20auw0k2bjeg0ma8ago0ma8c1k0oigbnc0oigd880qqd4ag0qqocu00qqoeew0qqzmyg0syl5h40sywe0o0sywflk0sz7o540v6t6ns0v74f7c0v74gs80v7fpbs0xf17ug0xfcge00xfchyw0xfnqig0zn99140znkhkopspkslslnookaooorspkrloonlolcpposrphropppprocpooooogoopqopooboooppssp222211goppoc374p000000c763ak4sks000000ccp8kiopop000000dookg9cccpspooossca9anoogr554445gaklloookpooooook9kklooogoloomkkh8khhgghdoghhgggh8dcdkkooookhkkkkkjkhhkkkkkjkkkkkkkkkedggggghkfgggggd",
-    iceBlick: "0g0g518m18rc18m1ac81atxztk1aty1eg1au99y04433213344444444420223333334220333300433443433331333113344333313302311333233441323331133133033103331013333110003331100011330013313311111111133332310000111123300333311111010332034331101111131303103311111111133200011011111133234311111333432224431111343442224",
-    cobwebBlick: "0g0g500000001jpkttk1o60w6w1smgyk81x2x0tc1000000020000001010000120210001000202100400202000001000410004000000420140202020000100101002000100020101201020020104132442000200202002000421232200010041401002002001001010020101000020104014200200004202210002200001001400012020001000002110000101000001000000001",
-    crackedStoneBrick: "0g0gg0ddc7aw0flk6wo0flk8hk0hts83c0hts9o80hu3i7s0k209a00k20auw0ma8ago0ma8c1k0oi533s0oigbnc0oigd880oirlrs0qqocu00qqoeew4444444444444444bb9cb999949bcbb922222222212332224444444456446646cbccbcccbcb9bc3c7777677646677726cecceececccccccccffeefeedeffeecc24244432223322232202222222222222babcccbb99bb999b8899999897787777eceffeeccccccbbb46777744464464649bbc9abbccbcbccb99bbbbbce9bccccb",
-    grassLeavesSide: "0g0ga000000006q87aw06qjfug08yg6wo08yrfg808z2nzs08zdwjc0b7anlk0b7lw540dggeew0000050000000000000009000005000000900500905000010051055050105091905505105015004551050410415590509105041015109050551514441510501005151440456555500510115410115140041010141014514001601015101441000116141517141500058614155714153002215215151111204521211212221210",
-    grassLeavesTop: "0g0g100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    blackStainedGlass: "0g0g2000004808ww4xk1111111111111111100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011111111111111111",
-    whiteTerracotta: "0g0g11jobm600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    sidewaysPillar: "0g0g51hhcsmw1jpkttk1lxsv081o60w6w1qe8xdk0000000000000000000000000000000011111111111111114444444444444444111111111111111100000000000000003333333333333333222111122221111200000000000000000000000000000000111111111111111144444444444444441111111111111111000000000000000033333333333333332221111222211112",
-    torch: function(n) { drawTorch(animTile, 0); blit(n, animTile) },
-	fire:  function(n) { drawFire(animTile, 0); blit(n, animTile) },
-
-	lighter: function(n) {
-		const O  = [40, 40, 48]      // kontur
-		const M1 = [205, 210, 220]   // metal jasny
-		const M2 = [150, 156, 168]   // metal średni
-		const M3 = [95, 100, 112]    // metal ciemny
-		const K1 = [255, 245, 150]   // płomień: środek
-		const K2 = [255, 190, 40]    // płomień: środek-brzeg
-		const K3 = [235, 100, 20]    // płomień: brzeg
-
-		const px = (x, y, c) => setPixel(n, x, y, c[0], c[1], c[2], 255)
-		const rect = (x0, y0, x1, y1, c) => {
-			for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) px(x, y, c)
-		}
-
-		// Korpus
-		rect(4, 8, 11, 14, M2)
-		rect(4, 8, 5, 14, M1)
-		rect(10, 8, 11, 14, M3)
-		for (let x = 3; x <= 12; x++) { px(x, 7, O); px(x, 15, O) }
-		for (let y = 8; y <= 14; y++) { px(3, y, O); px(12, y, O) }
-		rect(4, 11, 11, 11, M3) // pasek ozdobny
-
-		// Pokrywka
-		rect(4, 4, 11, 6, M2)
-		rect(4, 4, 11, 4, M1)
-		rect(4, 6, 11, 6, M3)
-		for (let x = 3; x <= 12; x++) px(x, 3, O)
-		for (let y = 4; y <= 6; y++) { px(3, y, O); px(12, y, O) }
-
-		// Zawias
-		px(4, 7, M3); px(11, 7, M3)
-
-		// Dysza przy lewej krawędzi (zamiast knota)
-		px(4, 2, O); px(5, 2, M3)
-		px(4, 3, M3); px(5, 3, M1)
-
-		// Płomień nad dyszą, przesunięty w lewo
-		px(4, 1, K2); px(5, 1, K2)
-		px(4, 0, K3); px(5, 0, K1)
-		px(3, 1, K3); px(6, 1, K3)
-	},
-	ladder: function(n) {
-		for (let y = 0; y < 16; y++) {
-			for (let x = 0; x < 16; x++) {
-				const rail = x <= 2 || x >= 13
-				const rung = y % 5 < 2 && x > 2 && x < 13
-				if (rail || rung) {
-					const d = 0.8 + Math.random() * 0.2
-					setPixel(n, x, y, 150 * d, 110 * d, 60 * d, 255)
-				} else {
-					setPixel(n, x, y, 0, 0, 0, 0)
-				}
-			}
-		}
-	},
-	trapdoor: function(n) {
-		for (let y = 0; y < 16; y++) {
-			for (let x = 0; x < 16; x++) {
-				const d = 0.9 + Math.random() * 0.1
-				const frame = x < 2 || x > 13 || y < 2 || y > 13 || (y >= 6 && y <= 9)
-				let r = frame ? 160 : 190, g = frame ? 120 : 154, b = frame ? 70 : 96
-				if (x === 7 || x === 8) { r *= 0.8; g *= 0.8; b *= 0.8 }
-				setPixel(n, x, y, r * d, g * d, b * d, 255)
-			}
-		}
-	},
-    
+		sandStoneSide: "0g0gh18jtywo1f86tx41hgetiw1hgq22g1hgq3nc1jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1lwuvw81lwuxh41lx660o1lx67lk1lxhg541o5e8s800000000000dd000946430b99b09c02b000000490000000099d0100009b0b86899b0ddd90990686b00d0ddd9000000003000000000dd90502478bd0880ddd0000099690e90aadda0b09b940000daeee0d0ddcddde0ceedf0e000000000000000dcdfg0e09eadddd0000df0d00000000099000090de0dc0d0aa9c0000cd0ad0d0",
+		sandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
+		smoothSandStoneSide: "0g0gz18jtywo18ju0hk18k59141arqpyw1arqrjs1as203c1as21o81asda7s1d0a1a01d0a2uw1f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lk1o52yns1o5e77c1o5e8s81o5phbs1qdm8e01qdm9ywvvvvvvvvruuuvuvvrlrlnrsrlfkoorss6256669986662556wwvwursvwyvvuuusvrlmpmprpmlmppr6vsrrpllmlllrrrr8xrpplrpijllllcl8vrllrrpilliliac5vglmmlllmlfccfl6ulllldbllffidil6uillidielffic8e5ulllkifikioploi6tklkeiflliorroq5rillllkdffrooor5ukloihdcdflfeif3l899900415558765",
+		smoothSandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
+		chiseledSandStoneSide: "0g0gt16blzaw1as203c1d0a1a01d0a2uw1f8i2go1f8i41k1hgetiw1hgev3s1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lk1lxhg541o52x2w1o52yns1o5e77c1o5e8s81o5phbs1qdm9ywqqqqqqqqkpppqpqqkfkfgklkf9ehhkll0000000000000000qrqrpilqrsqqpppq00000000000000000aak099k059k0990040k0d0k070k02000300090007000100f9ffffa9ff9246ef0000000000000000pmppoknkokkoifklffffec9cechifhcf9efe8c9ffchkkhj96cffffe699khhhkceefheb6469f98c980000000000000000",
+		chiseledSandStoneTop: "0g0gk1d0a1a01f86sc81f8i0vs1f8i2go1hgetiw1hgq22g1hgq3nc1hgq5881jomt4o1jomupk1jomwag1joy3941joy4u01joy6ew1jp9eyg1lwuvw81lwuxh41lx64fs1lx660o1lx67lkccddiccc59cfcccciciceijic6bffijjicciiijjiccicccgiidi936fijcgccccdicdgdgigdcdgggcdiiigccdccciiiidiiggcig9acccc3cgcicciig9cc9c9136c7cddcccdc6336ccccccc42cc66949cac9cc9495c6693056ccccb969b9fgcf9c6bcb596cc9fiifh649ccccb466ifffi9bbcfb84346c65965cfigi3366699fccb",
+		ironBarsSide: "0g0g200000000sywflk0010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100001000001000010011111111111111110010000010000100001000001000010000100000100001000010000010000100001000001000010000100000100001000010000010000100",
+		ironBarsTop: "0g0g100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		waterBlock: "0g0gr09j1gaw09t11vs09t122w09t2gug09t2h1k09t3vt409t3w080a34w5k0a34wco0a34wjs0a36b480a36bbc0a37q2w0a37qa00ad7bns0ad7buw0ad8qfc0ad8qmg0ad8qtk0ada5e00ada5l40ada5s80anb5xk0anb64o0anckw80ancl3c0anclagcionc317c713cnoiipof6229ig8bilgboohbba8goohbba8gnfbhmkcenof633alc6bmqnd7cjd403bi32aknmf53ac746bb128cdfh8128cdfh879ge758c702ajoogcionc317c713cnoi7gooja207c857eg918hfdc8218hfdc823bb647ca35fmnka2cib304djc7dnqmb6nla336foneckmhbfog8abbhoog8abbhoibglib8gi9226fop",
+		altLeavesSide: "0g0gr029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k20auw0k5fqig0k5qz200k6296g11vskc8j9dck8cpj31111ch1111112doeoj1111114on11111bi0dpl14dfo15gj30111fj060111ceo4311314mmmmmmmmmmmmmmmmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmqqqqqqqqqqqqqqmmmmmmmmmmmmmmmmm113dc441111cceo0dol10fnp336111344dk231dh151dno11o41jk11476achk3k",
+		altLeavesTop: "0g0gp029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k5fqig0k5qz200k6296gj9dck8coj31111ch1111112dnenj1111114nm11111bi0dol14dfn15gj30111fj060111cen4311314hbjm121341cjmn3111cn14hfmj63bj113111111ddk111011k101kk41113fkh4an83cfk1ek1hchk21331111ddo91137111deek1113141nnn1113dc441111ccen0dnl10fmo336111344dk231dh151dmn11n41jk11476achk3k",
+		oakDoorTip: "0g0ga04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4hlvc0b4suew0dcplh40xfchyo8887775544442110874444432221101184444444444221418547559999444242844755999944224284469999999922428447999999992242844799999999224284479999999922428447999999992242844599999999224284459999999922428445999999992242844599999999224274449999999922427444999999992242",
+		oakDoorBittim: "0g0gb02881dk04g4sfs04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4suew0xfchyo1d0kx6g86469999999944648646999999994a6486469999999944448646999999994364764699999999436474469999999933646446999999993364643699999999335364369999999933536334999999993343633499999999324343249999999922424223999999992232311333999922223221122299992211311001111111111121",
+		justLeaves: "0g0gp029gzjs04hdqm006qjhfc08yg8hk08yrh1408yrim008z2pko08z2r5k0b6zi7s0b7aqrc0dg59140dgghko0fod8mw0fooh6g0fooirc0fozpq00fozraw0hwwid40hx7pbs0hx7qwo0hxizg80hxu7zs0k5fqig0k5qz200k6296gj9dck8coj31111ch1111112dnenj1111114nm11111bi0dol14dfn15gj30111fj060111cen4311314hbjm121341cjmn3111cn14hfmj63bj113111111ddk111011k101kk41113fkh4an83cfk1ek1hchk21331111ddo91137111deek1113141nnn1113dc441111ccen0dnl10fmo336111344dk231dh151dmn11n41jk11476achk3k",
+		oakDoorBittimboi: "0g0gb02881dk04g4sfs04gg0zc06ocs1k06octmg08w9koo08wkt880b4hkag0b4suew0xfchyo1d0kx6g864699999999446486a699999999436486469999999944448646999999994364764699999999436474469999999933646446999999993364643699999999335364369999999933536334999999993343633499999999324343249999999922424223999999992232311333999922223221122299992211311001111111111121",
+		dispenserBlick: "0g0gt000006w06oo26006oo3qw0hts83c0k209a00k20auw0k2bjeg0ma8ago0ma8c1k0oigbnc0oigd880qqd4ag0qqocu00qqoeew0qqzmyg0syl5h40sywe0o0sywflk0sz7o540v6t6ns0v74f7c0v74gs80v7fpbs0xf17ug0xfcge00xfchyw0xfnqig0zn99140znkhkopspkslslnookaooorspkrloonlolcpposrphropppprocpooooogoopqopooboooppssp222211goppoc374p000000c763ak4sks000000ccp8kiopop000000dookg9cccpspooossca9anoogr554445gaklloookpooooook9kklooogoloomkkh8khhgghdoghhgggh8dcdkkooookhkkkkkjkhhkkkkkjkkkkkkkkkedggggghkfgggggd",
+		iceBlick: "0g0g518m18rc18m1ac81atxztk1aty1eg1au99y04433213344444444420223333334220333300433443433331333113344333313302311333233441323331133133033103331013333110003331100011330013313311111111133332310000111123300333311111010332034331101111131303103311111111133200011011111133234311111333432224431111343442224",
+		cobwebBlick: "0g0g500000001jpkttk1o60w6w1smgyk81x2x0tc1000000020000001010000120210001000202100400202000001000410004000000420140202020000100101002000100020101201020020104132442000200202002000421232200010041401002002001001010020101000020104014200200004202210002200001001400012020001000002110000101000001000000001",
+		crackedStoneBrick: "0g0gg0ddc7aw0flk6wo0flk8hk0hts83c0hts9o80hu3i7s0k209a00k20auw0ma8ago0ma8c1k0oi533s0oigbnc0oigd880oirlrs0qqocu00qqoeew4444444444444444bb9cb999949bcbb922222222212332224444444456446646cbccbcccbcb9bc3c7777677646677726cecceececccccccccffeefeedeffeecc24244432223322232202222222222222babcccbb99bb999b8899999897787777eceffeeccccccbbb46777744464464649bbc9abbccbcbccb99bbbbbce9bccccb",
+		grassLeavesSide: "0g0ga000000006q87aw06qjfug08yg6wo08yrfg808z2nzs08zdwjc0b7anlk0b7lw540dggeew0000050000000000000009000005000000900500905000010051055050105091905505105015004551050410415590509105041015109050551514441510501005151440456555500510115410115140041010141014514001601015101441000116141517141500058614155714153002215215151111204521211212221210",
+		grassLeavesTop: "0g0g100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		blackStainedGlass: "0g0g2000004808ww4xk1111111111111111100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011000000000000001100000000000000110000000000000011111111111111111",
+		whiteTerracotta: "0g0g11jobm600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		sidewaysPillar: "0g0g51hhcsmw1jpkttk1lxsv081o60w6w1qe8xdk0000000000000000000000000000000011111111111111114444444444444444111111111111111100000000000000003333333333333333222111122221111200000000000000000000000000000000111111111111111144444444444444441111111111111111000000000000000033333333333333332221111222211112",
+		torch: "0g0gj00000000qpkpvj0qzkb9b0rjmbcv0snowsf0sxoi670t7pibj0trq3nj0uvu3un0v5tp8f0vpuarj0vpvpbz0w9wanz0wtww730x3xw5b1yxaein1yza41r1yze96n1z0hrlr0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fh00000000000000gi00000000000000c1000000000000002d000000000000004600000000000000a8000000000000007b000000000000002300000000000000e500000000000000890000000",
+		fire: "0g0gz00000001yt2p6n1yt8bgf1ytmd4v1ytrzen1ytz08v1yu61331yubncv1yuh9mn1yupp1b1yuy4fz1yv7yf31yvdkov1yvm03j1yvvu2n1yw1gcf1ywbabj1ywl4an1ywuy9r1yx1z3z1yxaein1yxiu4f1yxn2tb1yxsq9r1yxydj31yy6upr1yygqv31yyp81r1yytgqn1yz0iyn1yz66f31yzaf3z1yzhh4v1yzkb271z0435r000000000000000000000000000000000000000000001000000000000000300000000000000060000300310000009000070064000000b2033a40a8003303e5078d83db007707g90abgc8fe00bb0bid0efifcih00ef0fkg8hiliglk88ii4iojdkmpmkpoeemmcmqnioqsqpsrkkqqiqtqnrvwvuwwrrvvqvxvtwyyyyyyyyyyyyyyyy",
+		lighter: "0g0g800000000b547pb0qguigv15sf5dr1l3wydb1tb95vj1yyjklb1z0pfjz0000570000000000000566500000000000001200000000000001241111111000000144444444100000013333333310000001222222221000000121111112100000014433332210000001443333221000000144333322100000012222222210000001443333221000000144333322100000014433332210000001111111111000",
+		ladder: "0g0gz00000000xe35kv0xo45j30xy3r3z0xy55of0y84r270yi5r0f0ys5clb0z26cjj0zc7chr0zc7cov0zw7y0v1068y6710g9y4f10qay2n110ajnj11abjlr11kcjr3124d53312ee58f12of56n12yeqrj12yg5bz138fqpr138h5a713igqnz13igqv313shqtb142iqrj14ciccf14mjcan14wkc8v156jxtr156lce715gkxrzhbbr1wktb8fub1dcihk29fmb156n8uijydw0000000000y6bbdf0000000000r6p7b60000000000ys9nvf1d1b3d9gq4cgco2cs294c3n1yruedfkc0000000000erpfha0000000000rcbk880000000000qcrn1fbmrw6ijb8dyln8trx8io1xkya5rm1sbn00000000008uibpx000000000059lkfv00000000005k5b5uitbpudwrwccan",
+		trapdoor: "0g0gz0w02dxb0wu3zen0xe5zi70xy7zlr0yi8l4v0z296nz124soan12ot9tr138v9xb142ll33142wven14cxvjz14wn6kf14wzvnj15gp6nz15r2vwf1613vun16aqs5b16urdof17etdrz17oudxb188uz9b1blgvzz1bvjapr1cfjw8v1cpkw731czkhrz1d9lhq71dtnhtr1e3ohz31enp3i71exq3gf1fhs3jz1frt3pb1glup6niekekce45jhihejjcjh9hj935hkcjeelehwswxsbbnsnnwhceeqxyty68unqxr9ckkwyqyp76ymnnxhcklqtnut8gytsuwhh9ihejlc40echkklcjeeh9c942ljehk9j9iheihh33eiccclj9chjjcc12cklke9i9enuotx7dwxtpn9jcewyyqnb8srqxojjhixwroxa6tsttqj9elsyptpf7sxxvmehhcccll935hhl9k99jjicchl54ccj9jce",
+		pigSkin: "0g0gz1o2upz31ocubjz1omvbi71owux331owwbnj1p6vx1b1p6vx8f1p6xbsv1pgwx6n1pqwirj1pqxxbz1q0xipr1q0xiwv1qayiv31qky4fz1qkzj0f1quz4lb1r504jj1rezq4f1rf14ov1rp0q2n1rp0q9r1rz0bnj1rz1q7z1s91bsv1sj2br31st1xbz1t32xhb1td3xfj1td3xmn1tn3j0f1tn4xkv1tx4j5r1u744jj1uh54ovqpqyqr0rogkoyxayu8a2g74qqr2k0f4ggi2tqykrl20rmqq2gf8w7c3nlw8yc5wiupy2ukti0lhdqot03q90g03oqwx5bbgyqth5tj4y62o0uysqdbrt8rw8nw9plx4v0pwnerd2a8mfnd9wgawvo8w2ja8rgu61yg2la5rqqbrxaynuen0lgqul05pa7qhf85jg5iytid8imq8kqtdud5v4p74hi65q92ew8dqr6ynv22wddbauiywhn44y76oi",
+		pigFace: "0g0gz07ir66707ss6bj082t6gv14bdrlr155fd331pgwx6n1pqxxbz1q0xiwv1qayiv31qky4fz1quz4lb1rezq4f1rz0bnj1s02dbz1s91bsv1sa3dhb1st3bwf1su3z0f1t32xhb1t44yyn1te4kjj1tn3j0f1to6z9b1tx4j5r1ty6ku71u87kzj1uh54ov1ui8l4v1v296nz1vca6tb1vmb6yn1w6bshr1wgcsn31wqdssf1xaeebj5qaannqabq5qlnabbee7n78ql7eqce66gcl9a9qebqeaeae8ieaneaqig58llqbl5l96anq5ge99in7aqie01n666eb015lelee02ci8leb125alca6g8b65c586e5n55elauvhffrktcg6bic85fyhpxkmx8bncaq7epf4to3xule9e9iaqyo4td4mj7nnbe6lnuwhxwowreiqaqnllmvtksotyil68g7cq5956lcieeen955ee8l55encg6el9",
+		cowSkin: "0g0gz0p194ov0p1aj9b0pba4n30plb4lb0plb4sf0pvaq670q5bq4f0qfbbpb0qpcbnj0qzdblr0qzdbsv0r9cx6n0r9ebr30rjdx4v1n1wvlr1nbxvr31nlyvwf1nvzw1r1o60w731og1wcf1oq2whr1p03wn31pa4wsf1pu6x331q47x8f1qo9xj31qyaxof1r8bxtr1ricxz31rsdy4f1s2ey9r1scfyf31smgykf1swhypr1t6iyv3682pqc365888b888883tl8d82276d2828ddkf885dd8qj88455848d8d6d6ewo2diac5b39a6a22v8b0h8062922c80b20d8u487662ret18b256669ac08syn88268526620d0et0dd6d9269ddby209606a6595489xw558c69dd68c58vwm88220d8a2822bnof275da7d688b6uqa7dda64dc68hqmy08c24821560mfvrl8583c46883ghq",
+		cowFace: "0g0gz050i3un05aj3zz0n3270f0or3zlr0plb4lb0q5bq4f0qzdblr0r9ebr31dtjgu71e3kgsf1edlgxr1enmh331f7n2m71frno5b1frp2wv1g1q2v31gbpofz1gvroqn1h5soov1hfsa9r1hpta7z1hzuadb1og1wcf1p03wn31pa4wsf1pu6x331q47x8f1qo9xj31qyaxof1r8bxtr1ricxz31s2ey9r1scfyf31smgykf1t6iyv34647747xw75444744646777sm44744764465445qv77577556474657pu66745664665464to64577577471146py57117677740077py67117765454654yr66476555564676sn67767454775fh9djl8b55466766ai8hckbf64766666a83fd2ff44756776lcdekgge47554754flbikba9744766779bhjjcjh47457744646646657754",
+		pigEgg: "0g0g5000000015pfzsv1gtz08v1ur64u71xl7lrz0000000000000000000000000000000000000022220000000000223333220000000221433332200000023433333220000023333331432200002333333433220002333334333332200233143333333220023343333331322002333333143332200223333343332220002333333333220000022333333220000000222222220000",
+		cowEgg: "0g0g500000000b4n7cv0jgyy2n0ulkq2n1uamzgf0000000000000000000000000000000000000022220000000000223333220000000221433332200000023433333220000023333331432200002333333433220002333334333332200233143333333220023343333331322002333333143332200223333343332220002333333333220000022333333220000000222222220000"
 	}
 
 	let blockData = [
@@ -721,6 +602,8 @@ function MineKhan() {
 	{ name: "oakDoorTop", textures: "oakDoorTip", transparent: true, shadow: false, special: true, hidden: true },
 	{ name: "ladder", transparent: true, shadow: false, noCollide: true, special: true },
 	{ name: "trapdoor", transparent: true, shadow: false, special: true },
+	{ name: "pigEgg", special: true },
+	{ name: "cowEgg", special: true },
 		
 	]
 	const BLOCK_COUNT = blockData.length;
@@ -1434,6 +1317,7 @@ function MineKhan() {
 
 		previousScreen = screen
 		screen = newScene
+		updateTouchUI()
 		mouseDown = false
 		drawScreens[screen]()
 		Button.draw()
@@ -1484,7 +1368,7 @@ function MineKhan() {
 
 	let gl
 	function getPointer() {
-		if (canvas.requestPointerLock) {
+		if (!touchMode && canvas.requestPointerLock) {
 			canvas.requestPointerLock()
 		}
 	}
@@ -3281,7 +3165,7 @@ function MineKhan() {
 			}
 		}
 	}
-	function newWorldBlock() {
+	function newWorldBlock(click) {
 		if (!hitBox.pos || !holding) return
 		let pos = hitBox.pos, x = pos[0], y = pos[1], z = pos[2]
 		const target = world.getBlock(x, y, z) // blok, w który celujesz
@@ -3300,6 +3184,14 @@ function MineKhan() {
 
 		if (holding === blockIds.lighter) { // zapalniczka stawia ogień
 			world.setBlock(x, y, z, blockIds.fire)
+			p.lastPlace = Date.now()
+			return
+		}
+		if (holding === blockIds.pigEgg || holding === blockIds.cowEgg) {
+			// jajko działa tylko przy kliknięciu, nie przy trzymaniu przycisku
+			if (!click || world.mobs.length >= MOB_HARD_CAP) return
+			if (mobSolid(x, y + 1, z)) return // brak miejsca nad głową
+			spawnMob(holding === blockIds.pigEgg ? "pig" : "cow", x, y - 0.45, z)
 			p.lastPlace = Date.now()
 			return
 		}
@@ -4236,7 +4128,362 @@ function MineKhan() {
 			console.log(message, ellapsed.toFixed(2), "milliseconds")
 		}
 	}
+	// ===== MOBY (pasywne) =====
+	const MAX_MOBS = 16
+	const MOB_HARD_CAP = 40 // limit razem z jajkami
+	const MOB_SPAWN_MIN = 14, MOB_SPAWN_MAX = 40, MOB_DESPAWN = 70
+	const MOB_GRAVITY = 0.03
+	// część: [x0, y0, z0, x1, y1, z1, 1 = przód z pyskiem, faza nogi (0 = nie noga)]
+	const MOB_TYPES = {
+		pig: {
+			hw: 0.32, h: 0.9, hp: 3, speed: 0.03, skin: "pigSkin", face: "pigFace",
+			parts: [
+				[-0.28, 0.28, -0.40, 0.28, 0.68, 0.30, 0, 0],
+				[-0.22, 0.40, 0.30, 0.22, 0.84, 0.64, 1, 0],
+				[-0.26, 0, -0.38, -0.08, 0.28, -0.20, 0, 1],
+				[0.08, 0, -0.38, 0.26, 0.28, -0.20, 0, -1],
+				[-0.26, 0, 0.08, -0.08, 0.28, 0.26, 0, -1],
+				[0.08, 0, 0.08, 0.26, 0.28, 0.26, 0, 1]
+			]
+		},
+		cow: {
+			hw: 0.38, h: 1.4, hp: 4, speed: 0.025, skin: "cowSkin", face: "cowFace",
+			parts: [
+				[-0.34, 0.55, -0.62, 0.34, 1.05, 0.34, 0, 0],
+				[-0.24, 0.90, 0.34, 0.24, 1.38, 0.74, 1, 0],
+				[-0.32, 0, -0.58, -0.12, 0.55, -0.36, 0, 1],
+				[0.12, 0, -0.58, 0.32, 0.55, -0.36, 0, -1],
+				[-0.32, 0, 0.06, -0.12, 0.55, 0.28, 0, -1],
+				[0.12, 0, 0.06, 0.32, 0.55, 0.28, 0, 1]
+			]
+		}
+	}
+	// narożniki ścian (0 = min, 1 = max) w kolejności lewo-góra, prawo-góra, prawo-dół, lewo-dół + jasność
+	const MOB_FACES = [
+		{ c: [[0,1,1],[1,1,1],[1,0,1],[0,0,1]], s: 0.8 }, // przód (+z)
+		{ c: [[1,1,0],[0,1,0],[0,0,0],[1,0,0]], s: 0.8 }, // tył
+		{ c: [[1,1,1],[1,1,0],[1,0,0],[1,0,1]], s: 0.7 }, // +x
+		{ c: [[0,1,0],[0,1,1],[0,0,1],[0,0,0]], s: 0.7 }, // -x
+		{ c: [[0,1,1],[1,1,1],[1,1,0],[0,1,0]], s: 1.0 }, // góra
+		{ c: [[0,0,0],[1,0,0],[1,0,1],[0,0,1]], s: 0.5 }  // dół
+	]
+	const mobArray = new Float32Array(MOB_HARD_CAP * 8 * 144)
+	let mobBuffer = null
 
+	function safeMobs(fn) {
+		try { fn() } catch (e) {
+			if (!safeMobs.warned) { safeMobs.warned = true; console.error("mobs:", e) }
+		}
+	}
+	function mobSolid(x, y, z) {
+		const s = world.getBlock(x, y, z)
+		if (!s) return false
+		const d = blockData[s]
+		return !!d && !d.noCollide
+	}
+	function mobBlocked(m, x, y, z) {
+		const hw = m.t.hw
+		const y0 = Math.round(y + 0.1), y1 = Math.round(y + m.t.h - 0.1)
+		for (let ix = -1; ix <= 1; ix += 2) {
+			for (let iz = -1; iz <= 1; iz += 2) {
+				const cx = Math.round(x + ix * hw), cz = Math.round(z + iz * hw)
+				for (let cy = y0; cy <= y1; cy++) if (mobSolid(cx, cy, cz)) return true
+			}
+		}
+		return false
+	}
+	function mobGroundAhead(x, y, z) { // czy przed mobem jest bezpieczny grunt (nie woda, nie głęboki dół)
+		const cx = Math.round(x), cz = Math.round(z), cy = Math.round(y - 0.01)
+		for (let k = 0; k < 4; k++) {
+			const s = world.getBlock(cx, cy - k, cz)
+			if ((s & 0xff) === blockIds.waterBlock) return false
+			if (s && !blockData[s].noCollide) return true
+		}
+		return false
+	}
+	function findShore(m) { // kierunek do najbliższego brzegu, na który da się wyjść z wody
+		const by = Math.round(m.y)
+		for (let r = 1; r <= 6; r++) {
+			for (let k = 0; k < 16; k++) {
+				const a = k * Math.PI / 8
+				const cx = Math.round(m.x + Math.sin(a) * r), cz = Math.round(m.z + Math.cos(a) * r)
+				for (let cy = by; cy >= by - 1; cy--) {
+					if (!mobSolid(cx, cy, cz)) continue
+					const w = (world.getBlock(cx, cy + 1, cz) & 0xff) === blockIds.waterBlock
+					if (!w && !mobSolid(cx, cy + 1, cz) && !mobSolid(cx, cy + 2, cz)) return a
+					break
+				}
+			}
+		}
+		return null
+	}
+	function spawnMob(type, x, y, z) {
+		const yaw = Math.random() * Math.PI * 2
+		world.mobs.push({
+			type: type, t: MOB_TYPES[type], x: x, y: y, z: z,
+			vy: 0, kx: 0, kz: 0, yaw: yaw, target: yaw,
+			timer: Math.random() * 2000, walking: false, panic: 0,
+			hp: MOB_TYPES[type].hp, onGround: false, anim: Math.random() * 10, amp: 0, hurt: 0, fallY: y
+		})
+	}
+	function trySpawnHerd() {
+		const ang = Math.random() * Math.PI * 2
+		const dist = MOB_SPAWN_MIN + Math.random() * (MOB_SPAWN_MAX - MOB_SPAWN_MIN)
+		const x = Math.round(p.x + Math.cos(ang) * dist), z = Math.round(p.z + Math.sin(ang) * dist)
+		const type = Math.random() < 0.5 ? "pig" : "cow"
+		const n = 1 + (Math.random() * 3 | 0)
+		for (let i = 0; i < n && world.mobs.length < MAX_MOBS; i++) {
+			const sx = x + (Math.random() * 5 | 0) - 2, sz = z + (Math.random() * 5 | 0) - 2
+			const c = world.chunks[sx >> 4] && world.chunks[sx >> 4][sz >> 4]
+			if (!c || !c.loaded) continue
+			const g = c.tops[(sz & 15) * 16 + (sx & 15)]
+			if (!superflat && g <= SEA_LEVEL + 1) continue
+			if (world.getBlock(sx, g, sz) !== blockIds.grass) continue
+			if (world.getBlock(sx, g + 1, sz) || world.getBlock(sx, g + 2, sz)) continue
+			spawnMob(type, sx, g + 0.5, sz)
+		}
+	}
+	function updateMobs() {
+		const now = Date.now()
+		let dt = (now - (world.lastMobTick || now)) / 33
+		world.lastMobTick = now
+		dt = dt > 2 ? 2 : dt
+		const mobs = world.mobs
+
+		if (now > world.nextMobSpawn) {
+			world.nextMobSpawn = now + 2500
+			if (mobs.length < MAX_MOBS && Math.random() < 0.47) trySpawnHerd()
+		}
+
+		for (let i = mobs.length - 1; i >= 0; i--) {
+			const m = mobs[i], t = m.t
+			if (m.dying !== undefined) {
+				m.dying += dt * 33
+				if (m.dying >= 600) { mobs.splice(i, 1); continue }
+				m.walking = false
+				m.panic = 0
+				m.timer = 1e9 // martwy mob nie podejmuje decyzji
+			} else if (m.hurt > 0) m.hurt -= dt * 33
+			const dx = m.x - p.x, dz = m.z - p.z
+			if (dx * dx + dz * dz > MOB_DESPAWN * MOB_DESPAWN || m.y < -20) { mobs.splice(i, 1); continue }
+			const ccx = Math.round(m.x) >> 4, ccz = Math.round(m.z) >> 4
+			const chunk = world.chunks[ccx] && world.chunks[ccx][ccz]
+			if (!chunk || !chunk.loaded) continue
+
+			// decyzje
+			m.timer -= dt * 33
+			if (m.panic > 0) {
+				m.panic -= dt * 33
+			} else if (m.timer <= 0) {
+				m.timer = 1000 + Math.random() * 3000
+				if (Math.random() < 0.55) { m.walking = true; m.target = Math.random() * Math.PI * 2 }
+				else m.walking = false
+			}
+
+			// pływanie: mob w wodzie płynie do najbliższego brzegu
+			const inWater = (world.getBlock(Math.round(m.x), Math.round(m.y + 0.3), Math.round(m.z)) & 0xff) === blockIds.waterBlock
+			if (inWater && now > (m.swimT || 0)) {
+				m.swimT = now + 300
+				const a = findShore(m)
+				if (a !== null) m.target = a
+			}
+			if (m.jumpCd > 0) m.jumpCd -= dt * 33
+
+			// obrót
+			let diff = m.target - m.yaw
+			diff = Math.atan2(Math.sin(diff), Math.cos(diff))
+			m.yaw += diff * Math.min(1, 0.15 * dt)
+			const moving = m.dying === undefined && (m.walking || m.panic > 0 || inWater)
+			const speed = (m.panic > 0 ? t.speed * 2.2 : t.speed) * (inWater ? 0.7 : 1)
+			let mvx = 0, mvz = 0
+			if (moving && Math.abs(diff) < 1.2) { mvx = Math.sin(m.yaw) * speed; mvz = Math.cos(m.yaw) * speed }
+
+			// własny marsz omija wodę i przepaści, ale odrzut po uderzeniu może wrzucić moba do wody
+			if ((mvx || mvz) && m.onGround && !inWater) {
+				const look = t.hw + 0.35
+				if (!mobGroundAhead(m.x + Math.sin(m.yaw) * look, m.y, m.z + Math.cos(m.yaw) * look)) {
+					mvx = 0
+					mvz = 0
+					m.target = m.yaw + Math.PI / 2 + Math.random() * Math.PI
+				}
+			}
+			const kd = Math.pow(0.85, dt)
+			m.kx *= kd
+			m.kz *= kd
+
+			// ruch poziomy
+			const tx = m.x + (mvx + m.kx) * dt, tz = m.z + (mvz + m.kz) * dt
+			if (mobBlocked(m, tx, m.y, tz)) {
+				if (moving) {
+					if (!mobBlocked(m, tx, m.y + 1, tz)) { // da się wejść o jeden blok wyżej
+						if ((m.onGround || inWater) && !(m.jumpCd > 0)) {
+							m.vy = inWater ? 0.2 : 0.28
+							m.jumpCd = 400
+						}
+					} else if (m.onGround || inWater || m.vy <= 0) {
+						m.target = m.yaw + Math.PI / 2 + Math.random() * Math.PI
+					}
+				}
+			} else {
+				m.x = tx
+				m.z = tz
+			}
+
+			// ruch pionowy, w podkrokach co 0.25 bloku, żeby nie przelatywać przez cienkie podłoże
+			const wasGround = m.onGround
+			if (wasGround) m.fallY = m.y
+			if (inWater) m.vy += (0.08 - m.vy) * (m.vy > 0.08 ? 0.05 : 0.2) * dt // wypór bez tłumienia skoku
+			else m.vy -= MOB_GRAVITY * dt
+			if (m.vy < -1) m.vy = -1
+			m.onGround = false
+			const totalY = m.vy * dt
+			const steps = Math.max(1, Math.ceil(Math.abs(totalY) / 0.25))
+			const stepY = totalY / steps
+			for (let s = 0; s < steps; s++) {
+				const ny = m.y + stepY
+				if (stepY <= 0) {
+					let land = null
+					for (let ix = -1; ix <= 1; ix += 2) {
+						for (let iz = -1; iz <= 1; iz += 2) {
+							const cx = Math.round(m.x + ix * t.hw), cz = Math.round(m.z + iz * t.hw)
+							const cy = Math.round(ny - 0.01)
+							if (mobSolid(cx, cy, cz) && (land === null || cy > land)) land = cy
+						}
+					}
+					if (land !== null) { m.y = land + 0.5; m.vy = 0; m.onGround = true; break }
+				} else if (mobBlocked(m, m.x, ny, m.z)) {
+					m.vy = 0
+					break
+				}
+				m.y = ny
+			}
+			if (!m.onGround && m.y > m.fallY) m.fallY = m.y
+			// w wodzie unosi się i upadek się zeruje
+			if ((world.getBlock(Math.round(m.x), Math.round(m.y + 0.3), Math.round(m.z)) & 0xff) === blockIds.waterBlock) {
+				m.fallY = m.y
+			}
+			// obrażenia od upadku: powyżej 3 bloków, 1 życie za każdy kolejny blok
+			if (m.onGround && !wasGround) {
+				const fall = m.fallY - m.y
+				m.fallY = m.y
+				if (fall > 3) {
+					m.hp -= Math.ceil(fall - 3)
+					m.hurt = 450
+					if (m.hp <= 0) killMob(m)
+				}
+			}
+
+
+			// animacja nóg
+			m.amp += ((moving ? 1 : 0) - m.amp) * 0.2 * dt
+			if (moving) m.anim += (m.panic > 0 ? 0.5 : 0.25) * dt
+		}
+	}
+	function renderMobs() {
+		const mobs = world.mobs
+		if (!mobs.length) return
+		const arr = mobArray
+		let idx = 0, normalEnd = 0
+		const ordered = mobs.filter(m => m.hurt <= 0).concat(mobs.filter(m => m.hurt > 0))
+		const normalCount = ordered.findIndex(m => m.hurt > 0)
+		for (let mi = 0; mi < ordered.length; mi++) {
+			if (mi === (normalCount < 0 ? ordered.length : normalCount)) normalEnd = idx
+			const m = ordered[mi]
+			const sa = Math.sin(m.yaw), ca = Math.cos(m.yaw)
+			let cr = 1, sr = 0, lift = 0, sc = 1
+			if (m.dying !== undefined) {
+				const k = Math.min(1, m.dying / 250) // przewrócenie trwa 0,25 s
+				cr = Math.cos(k * Math.PI / 2)
+				sr = Math.sin(k * Math.PI / 2)
+				lift = m.t.hw * k // żeby leżał na ziemi, a nie w niej
+				sc = 1 - Math.max(0, (m.dying - 400) / 200) // ostatnie 0,2 s kurczy się
+			}
+			const skin = textureCoords[textureMap[m.t.skin]]
+			const face = textureCoords[textureMap[m.t.face]]
+			for (const part of m.t.parts) {
+				const dz = part[7] ? Math.sin(m.anim) * 0.12 * part[7] * m.amp : 0
+				const xs = [part[0], part[3]], ys = [part[1], part[4]], zs = [part[2] + dz, part[5] + dz]
+				for (let f = 0; f < 6; f++) {
+					const tc = (f === 0 && part[6]) ? face : skin
+					const face6 = MOB_FACES[f]
+					for (let v = 0; v < 4; v++) {
+						const c = face6.c[v]
+						const ax = xs[c[0]], ay = ys[c[1]]
+						const lx = (ax * cr - ay * sr) * sc
+						const ly = (ax * sr + ay * cr + lift) * sc
+						const lz = zs[c[2]] * sc
+						arr[idx++] = m.x + lx * ca + lz * sa
+						arr[idx++] = m.y + ly
+						arr[idx++] = m.z - lx * sa + lz * ca
+						arr[idx++] = tc[v * 2]
+						arr[idx++] = tc[v * 2 + 1]
+						arr[idx++] = face6.s
+					}
+				}
+			}
+		}
+		if (normalCount < 0) normalEnd = idx
+		if (!mobBuffer) mobBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, mobBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, idx), gl.DYNAMIC_DRAW)
+		gl.vertexAttribPointer(glCache.aVertex, 3, gl.FLOAT, false, 24, 0)
+		gl.vertexAttribPointer(glCache.aTexture, 2, gl.FLOAT, false, 24, 12)
+		gl.vertexAttribPointer(glCache.aShadow, 1, gl.FLOAT, false, 24, 20)
+		gl.disable(gl.CULL_FACE)
+		const normalQuads = normalEnd / 24
+		const hurtQuads = (idx - normalEnd) / 24
+		if (normalQuads > 0) {
+			gl.uniform1f(glCache.uHurt, 0)
+			gl.drawElements(gl.TRIANGLES, normalQuads * 6, gl.UNSIGNED_INT, 0)
+		}
+		if (hurtQuads > 0) {
+			gl.uniform1f(glCache.uHurt, 1)
+			gl.drawElements(gl.TRIANGLES, hurtQuads * 6, gl.UNSIGNED_INT, normalQuads * 6 * 4)
+			gl.uniform1f(glCache.uHurt, 0)
+		}
+		gl.enable(gl.CULL_FACE)
+	}
+	function hitMob() { // uderzenie moba na celowniku; zwraca true, jeśli trafiono
+		if (!world || !world.mobs.length || p.spectator) return false
+		const d = p.direction
+		const o = [p.x, p.y, p.z], dir = [d.x, d.y, d.z]
+		let best = null
+		let bt = Math.min(4.5, hitBox.pos ? hitBox.closest : 1e9)
+		for (const m of world.mobs) {
+			if (m.dying !== undefined) continue
+			const lo = [m.x - m.t.hw, m.y, m.z - m.t.hw]
+			const hi = [m.x + m.t.hw, m.y + m.t.h, m.z + m.t.hw]
+			let tmin = 0, tmax = bt, ok = true
+			for (let k = 0; k < 3; k++) {
+				if (Math.abs(dir[k]) < 1e-8) {
+					if (o[k] < lo[k] || o[k] > hi[k]) { ok = false; break }
+				} else {
+					let t1 = (lo[k] - o[k]) / dir[k], t2 = (hi[k] - o[k]) / dir[k]
+					if (t1 > t2) { const s = t1; t1 = t2; t2 = s }
+					if (t1 > tmin) tmin = t1
+					if (t2 < tmax) tmax = t2
+					if (tmin > tmax) { ok = false; break }
+				}
+			}
+			if (ok && tmin < bt) { bt = tmin; best = m }
+		}
+		if (!best) return false
+		best.hp--
+		best.panic = 2500
+		const ax = best.x - p.x, az = best.z - p.z, l = Math.hypot(ax, az) || 1
+		best.kx = ax / l * 0.18
+		best.kz = az / l * 0.18
+		best.target = Math.atan2(ax, az)
+		best.walking = true
+		best.hurt = 450 // czerwony przez ok. pół sekundy
+		if (best.onGround) best.vy = 0.17 // lekki podskok
+		p.lastBreak = Date.now()
+		if (best.hp <= 0) killMob(best) // brak dropu
+		return true
+	}
+	function killMob(m) { // animacja śmierci zamiast natychmiastowego usunięcia
+		if (m.dying === undefined) { m.dying = 0; m.hurt = 1 }
+	}
 	let fogDist = 16
 	class World {
 		constructor() {
@@ -4265,6 +4512,9 @@ function MineKhan() {
 			this.waterQueue = new Map()
 			this.nextWaterTick = 0
 			this.noWater = false
+			this.mobs = []
+			this.nextMobSpawn = 0
+			this.lastMobTick = 0
 		}
 		genChunk(chunk) {
 			let x = chunk.x >> 4
@@ -4664,7 +4914,7 @@ function MineKhan() {
 			}
 
 			if (Key.leftMouse && !Key.control && p.lastBreak < Date.now() - 250 && screen === "play") {
-				changeWorldBlock(0)
+				if (!hitMob()) changeWorldBlock(0)
 			}
 			if ((Key.rightMouse || Key.leftMouse && Key.control) && p.lastPlace < Date.now() - 250) {
 				newWorldBlock()
@@ -4760,6 +5010,7 @@ function MineKhan() {
 			for (let chunk of c) {
 				chunk.render()
 			}
+			safeMobs(renderMobs)
 			gl.depthMask(false) // woda nie zapisuje głębi
 			for (let i = c.length - 1; i >= 0; i--) {
 				c[i].renderWater() // od najdalszych
@@ -4977,6 +5228,8 @@ function MineKhan() {
 
 	let defineWorld = function() {
 		animateTextures()
+		safeMobs(updateMobs)
+
 		let tickStart = win.performance.now()
 		world.tick()
 		analytics.totalTickTime += win.performance.now() - tickStart
@@ -5255,6 +5508,10 @@ function MineKhan() {
 		Slider.all = []
 		const nothing = () => false
 		const always = () => true
+		const compact = touchMode && height < 520 // niski ekran telefonu
+		const BH = compact ? 34 : 40
+		const PY = i => compact ? 85 + i * 40 : 225 + i * 50
+		const OY = i => compact ? 40 + i * 40 : [125, 185, 245, 305, 365, 415, 465][i]
 
 		// Main menu buttons
 		Button.add(width / 2, height / 2 - 20, 400, 40, "Singleplayer", "main menu", r => changeScene("loadsave menu"))
@@ -5384,10 +5641,10 @@ function MineKhan() {
 		Button.add(mid, height / 2 + 50, w2, 40, currentLanguage === "English" ? "Back" : "Powrót", "editworld", r => changeScene(previousScreen))
 
 		// Pause buttons
-		Button.add(width / 2, 225, 300, 40, currentLanguage === "English" ? "Resume" : "Powrót do gry", "pause", play)
-		Button.add(width / 2, 275, 300, 40, currentLanguage === "English" ? "Options" : "Opcje", "pause", r => changeScene("options"))
+		Button.add(width / 2, PY(0), 300, BH, currentLanguage === "English" ? "Resume" : "Powrót do gry", "pause", play)
+		Button.add(width / 2, PY(1), 300, BH, currentLanguage === "English" ? "Options" : "Opcje", "pause", r => changeScene("options"))
 
-		Button.add(width / 2, 325, 300, 40,
+		Button.add(width / 2, PY(2), 300, BH,
 			currentLanguage === "English" ? "Save" : "Zapisz",
 			"pause", save, nothing, () =>
 				currentLanguage === "English"
@@ -5395,21 +5652,21 @@ function MineKhan() {
 					: `Zapisz świat na komputerze/przeglądarce. Nie działa w trybie incognito.\n\nOstatni zapis ${timeString(Date.now() - world.edited)}.`
 		);
 
-		Button.add(width / 2, 375, 300, 40, currentLanguage === "English" ? "Get Save Code" : "Pobierz kod zapisu", "pause", r => {
+		Button.add(width / 2, PY(3), 300, BH, currentLanguage === "English" ? "Get Save Code" : "Pobierz kod zapisu", "pause", r => {
 			savebox.classList.remove("hidden")
 			saveDirections.classList.remove("hidden")
 			savebox.value = world.getSaveString()
 		})
-		Button.add(width / 2, 425, 300, 40, currentLanguage === "English" ? "Exit Without Saving" : "Wyjdź bez zapisu", "pause", r => {
+		Button.add(width / 2, PY(4), 300, BH, currentLanguage === "English" ? "Exit Without Saving" : "Wyjdź bez zapisu", "pause", r => {
 			savebox.value = world.getSaveString()
 			initWorldsMenu()
 			changeScene("main menu")
 		})
 		
 		// Options buttons
-		Button.add(width / 2, 455, width / 3, 40, currentLanguage === "English" ? "Back" : "Powrót", "options", r => changeScene(previousScreen));
+		Button.add(width / 2, OY(6), width / 3, BH, currentLanguage === "English" ? "Back" : "Powrót", "options", r => changeScene(previousScreen));
 
-		let langBtn = Button.add(width / 2, 125, width / 3, 40, ["English", "Polski"], "options", r => {
+		let langBtn = Button.add(width / 2, OY(0), width / 3, BH, ["English", "Polski"], "options", r => {
 			currentLanguage = r;
 			localStorage.setItem("language", r);
 			initButtons();
@@ -5428,7 +5685,7 @@ function MineKhan() {
 
 
 		// Binds buttons
-		Button.add(width / 2, 185, width / 3, 40, currentLanguage === "English" ? "KeyBinds" : "Sterowanie", "options", r => {
+		Button.add(width / 2, OY(1), width / 3, BH, currentLanguage === "English" ? "KeyBinds" : "Sterowanie", "options", r => {
 			const msg = currentLanguage === "English"
 				? "Controls:\nMouse: Right-click place, Left-click remove, Middle-click pick\nKeys: WASD move, Space jump/fly, Shift sneak/down, Q sprint\nE inventory, B super breaker, Z zoom, L spectator, Enter slab/stair\n1–9 hotbar, Arrows look, P/Esc pause, T reload textures, ; release pointer"
 
@@ -5444,15 +5701,26 @@ function MineKhan() {
 		Button.add(width / 2, 395, width / 3, 40, "¯\\_(ツ)_/¯", "multiplayer menu", r => changeScene("main menu"))
 
 		// Settings Sliders
-		Slider.add(width/2, 245, width / 3, 40, "options", currentLanguage === "English" ? "Render Distance" : "Odległość Renderowania", 1, 32, "renderDistance", val => settings.renderDistance = Math.round(val))
-		Slider.add(width/2, 305, width / 3, 40, "options", "FOV", 30, 110, "fov", val => {
+		Slider.add(width/2, OY(2), width / 3, BH, "options", currentLanguage === "English" ? "Render Distance" : "Odległość Renderowania", 1, 32, "renderDistance", val => settings.renderDistance = Math.round(val))
+		Slider.add(width/2, OY(3), width / 3, BH, "options", "FOV", 30, 110, "fov", val => {
 			p.FOV(val)
 			if (world) {
 				p.setDirection()
 				world.render()
 			}
 		})
-		Slider.add(width/2, 365, width / 3, 40, "options", currentLanguage === "English" ? "Mouse Sensitive" : "Czułość myszki", 30, 400, "mouseSense", val => settings.mouseSense = val)
+		Slider.add(width/2, OY(4), width / 3, BH, "options", currentLanguage === "English" ? "Mouse Sensitive" : "Czułość myszki", 30, 400, "mouseSense", val => settings.mouseSense = val)
+		
+		const ctrlModes = ["auto", "touch", "keyboard"]
+		const ctrlLabels = currentLanguage === "English"
+			? ["Input: Auto", "Input: Touch", "Input: Keyboard & Mouse"]
+			: ["Tryb: Auto", "Tryb: Dotyk", "Tryb: Klawiatura i mysz"]
+		Button.add(width / 2, OY(5), width / 3, BH, ctrlLabels, "options", r => {
+			localStorage.setItem("controls", ctrlModes[ctrlLabels.indexOf(r)])
+			touchMode = detectTouch()
+			updateTouchUI()
+		})
+		Button.all[Button.all.length - 1].index = Math.max(0, ctrlModes.indexOf(localStorage.getItem("controls") || "auto"))
 
 		updateButtonLabels();
 	}
@@ -5668,6 +5936,15 @@ function MineKhan() {
 		}
 		return invListCache
 	}
+	let invScroll = 0
+	function invLayout() { // ile rzędów mieści się nad hotbarem i ile można przewinąć
+		const s = inventory.size
+		const perRow = 13
+		const top = 50 - s / 2
+		const rows = Math.max(3, Math.floor((height - s * 1.5 - top - 10) / s))
+		const total = Math.ceil(invList().length / perRow)
+		return { perRow, rows, maxScroll: Math.max(0, total - rows) }
+	}
 	function drawInv() {
 		const list = invList()
 		let x = 0
@@ -5675,6 +5952,8 @@ function MineKhan() {
 		let s = inventory.size
 		let s2 = s / 2
 		let perRow = 13
+		const L = invLayout()
+		invScroll = Math.min(invScroll, L.maxScroll)
 
 		gl.clearColor(0, 0, 0, 0)
 		gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
@@ -5686,7 +5965,7 @@ function MineKhan() {
 		ctx.lineWidth = 1
 		ctx.strokeStyle = "black"
 		ctx.beginPath()
-		for (y = 0; y < 10; y++) {
+		for (y = 0; y <= L.rows; y++) {
 			ctx.moveTo(50.5 - s2, 50.5 - s2 + y * s)
 			ctx.lineTo(50.5 - s2 + s * perRow, 50.5 - s2 + y * s)
 		}
@@ -5719,10 +5998,10 @@ function MineKhan() {
 		}
 
 		//Box highlight in inv
-		let overInv = Math.round((mouseY - 50) / s) * perRow + Math.round((mouseX - 50) / s)
-		if (overInv >= 0 && overInv < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2) {
+		let overInv = (Math.round((mouseY - 50) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
+		if (overInv >= 0 && overInv < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
 			x = overInv % perRow * s + 50 - s2
-			y = (overInv / perRow | 0) * s + 50 - s2
+			y = ((overInv / perRow | 0) - invScroll) * s + 50 - s2
 			ctx.lineWidth = 2
 			ctx.strokeStyle = "white"
 			ctx.beginPath()
@@ -5732,9 +6011,9 @@ function MineKhan() {
 		if (inventory.holding) {
 			drawIcon(mouseX, mouseY, inventory.holding)
 		}
-		for (let i = 0; i < list.length; i++) {
+		for (let i = invScroll * perRow; i < list.length && i < (invScroll + L.rows) * perRow; i++) {
 			x = i % perRow * s + 50
-			y = (i / perRow | 0) * s + 50
+			y = ((i / perRow | 0) - invScroll) * s + 50
 			drawIcon(x, y, list[i])
 		}
 
@@ -5747,7 +6026,8 @@ function MineKhan() {
 		let s = inventory.size
 		let s2 = s / 2
 		let perRow = 13
-		let over = Math.round((mouseY - 50) / s) * perRow + Math.round((mouseX - 50) / s)
+		const L = invLayout()
+		let over = (Math.round((mouseY - 50) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
 		let x = width / 2 - 9 / 2 * s + 25
 		let y = height - s * 1.5
 		let overHot = (mouseX - x) / s | 0
@@ -5755,7 +6035,7 @@ function MineKhan() {
 			let temp = inventory.hotbar[overHot]
 			inventory.hotbar[overHot] = inventory.holding
 			inventory.holding = temp
-		} else if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2) {
+		} else if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
 			inventory.holding = list[over]
 		} else {
 			inventory.holding = 0
@@ -5836,7 +6116,7 @@ function MineKhan() {
 				break
 		}
 		if(screen === "play") {
-			if (doc.pointerLockElement !== canvas) {
+			if (doc.pointerLockElement !== canvas && !touchMode) {
 				getPointer()
 				p.lastBreak = Date.now()
 			} else {
@@ -5844,7 +6124,7 @@ function MineKhan() {
 				if(e.button === 0) {
 					if(Key.control) {
 						place = true
-					} else {
+					} else if (!hitMob()) {
 						changeWorldBlock(0)
 					}
 				}
@@ -5855,7 +6135,7 @@ function MineKhan() {
 					place = true
 				}
 				if(place) {
-					newWorldBlock()
+					newWorldBlock(true)
 				}
 			}
 		} else if (screen === "inventory") {
@@ -6007,6 +6287,11 @@ function MineKhan() {
 	canvas.onwheel = e => {
 		e.preventDefault()
 		e.stopPropagation()
+		if (screen === "inventory") {
+			invScroll = Math.max(0, Math.min(invLayout().maxScroll, invScroll + (e.deltaY > 0 ? 1 : -1)))
+			drawScreens.inventory()
+			return
+		}
 		if (e.deltaY > 0) {
 			inventory.hotbarSlot++
 		} else if (e.deltaY < 0) {
@@ -6117,6 +6402,7 @@ function MineKhan() {
 		glCache.uSampler = gl.getUniformLocation(program3D, "uSampler")
 		glCache.uPos = gl.getUniformLocation(program3D, "uPos")
 		glCache.uDist = gl.getUniformLocation(program3D, "uDist")
+		glCache.uHurt = gl.getUniformLocation(program3D, "uHurt")
 		glCache.aShadow = gl.getAttribLocation(program3D, "aShadow")
 		glCache.aTexture = gl.getAttribLocation(program3D, "aTexture")
 		glCache.aVertex = gl.getAttribLocation(program3D, "aVertex")
@@ -6399,7 +6685,188 @@ function MineKhan() {
 		trees = true
 		caves = true
 	}
-	
+	// ===== STEROWANIE DOTYKOWE =====
+	const TOUCH_LOOK = 2.2 // im więcej, tym szybszy obrót palcem
+	function detectTouch() {
+		const pref = localStorage.getItem("controls") // "touch" | "keyboard" | brak = auto
+		if (pref === "touch") return true
+		if (pref === "keyboard") return false
+		return !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
+	}
+	let touchMode = detectTouch()
+	let tui = null, tinv = null, tjoy = null, tknob = null
+	const joy = { id: null, cx: 0, cy: 0, r: 60 }
+	const look = { id: null, x: 0, y: 0 }
+
+	// przyciski dotykowe wywołują te same funkcje co klawiatura i mysz
+	function tKey(k, down) {
+		const e = { key: k, repeat: false, preventDefault() {} }
+		if (down) canvas.onkeydown(e)
+		else canvas.onkeyup(e)
+	}
+	function tTap(k) { tKey(k, true); tKey(k, false) }
+	function tMouse(button, down) {
+		const e = { x: width / 2, y: height / 2, button: button }
+		if (down) canvas.onmousedown(e)
+		else canvas.onmouseup(e)
+	}
+	function joyReset() {
+		joy.id = null
+		Key.w = Key.a = Key.s = Key.d = Key.q = false
+		if (tknob) tknob.style.transform = "translate(-50%, -50%)"
+	}
+	function joyMove(e) {
+		let dx = e.clientX - joy.cx, dy = e.clientY - joy.cy
+		const len = Math.hypot(dx, dy)
+		if (len > joy.r) { dx *= joy.r / len; dy *= joy.r / len }
+		tknob.style.transform = "translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px))"
+		const nx = dx / joy.r, ny = dy / joy.r
+		Key.w = ny < -0.3
+		Key.s = ny > 0.3
+		Key.a = nx < -0.3
+		Key.d = nx > 0.3
+		Key.q = ny < -0.9 && len > joy.r * 0.95 // sprint: pchnij drążek do końca do przodu
+	}
+	function mkBtn(parent, cls, label, down, up) {
+		const b = document.createElement("div")
+		b.className = "tbtn " + cls
+		b.textContent = label
+		b.addEventListener("pointerdown", e => {
+			e.preventDefault()
+			if (b.classList.contains("on")) return
+			try { b.setPointerCapture(e.pointerId) } catch (x) { /* brak przechwytu */ }
+			b.classList.add("on")
+			down()
+		})
+		const end = () => {
+			if (!b.classList.contains("on")) return
+			b.classList.remove("on")
+			if (up) up()
+		}
+		b.addEventListener("pointerup", end)
+		b.addEventListener("pointercancel", end)
+		b.addEventListener("lostpointercapture", end)
+		parent.appendChild(b)
+	}
+	function updateTouchUI() {
+		if (!tui) return
+		const inPlay = touchMode && screen === "play"
+		tui.classList.toggle("hidden", !inPlay)
+		tinv.classList.toggle("hidden", !(touchMode && screen === "inventory"))
+		if (touchMode && !inPlay) { // wyjście z gry: puść wszystko
+			joyReset()
+			look.id = null
+			tui.querySelectorAll(".on").forEach(b => b.classList.remove("on"))
+			for (const k in Key) Key[k] = false
+			if (p && p.sneaking) { p.sneaking = false; p.speed = 0.075; p.bottomH = 1.62 }
+		}
+	}
+	function initTouch() {
+		if (tui) return
+		const css = document.createElement("style")
+		css.textContent = `
+#touchui, #touchinv { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; --tb: clamp(46px, 11vmin, 72px); --g: 10px; --m: 16px; }
+.tbtn { position: absolute; pointer-events: auto; touch-action: none; box-sizing: border-box; width: var(--tb); height: var(--tb); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.55); color: #fff; font: 600 calc(var(--tb) * 0.42) 'Poppins', sans-serif; }
+.tbtn.on { background: rgba(255,255,255,0.45); }
+.tbtn.sm { width: calc(var(--tb) * 0.75); height: calc(var(--tb) * 0.75); font-size: calc(var(--tb) * 0.34); }
+#tjoy { position: absolute; pointer-events: auto; touch-action: none; box-sizing: border-box; left: var(--m); bottom: var(--m); width: calc(var(--tb) * 2.3); height: calc(var(--tb) * 2.3); border-radius: 50%; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.45); }
+#tknob { position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; border-radius: 50%; background: rgba(255,255,255,0.55); transform: translate(-50%, -50%); pointer-events: none; }
+.t-break { right: var(--m); bottom: var(--m); }
+.t-place { right: calc(var(--m) + var(--tb) + var(--g)); bottom: var(--m); }
+.t-jump { right: var(--m); bottom: calc(var(--m) + var(--tb) + var(--g)); }
+.t-sneak { right: calc(var(--m) + var(--tb) + var(--g)); bottom: calc(var(--m) + var(--tb) + var(--g)); }
+.t-pause { left: 12px; top: 12px; }
+.t-inv { left: calc(12px + var(--tb) * 0.75 + 8px); top: 12px; }
+.t-mode { left: calc(12px + 2 * (var(--tb) * 0.75 + 8px)); top: 12px; }
+.t-iclose { right: 12px; top: 12px; }
+.t-iup { right: 12px; top: calc(12px + var(--tb) * 0.75 + 20px); }
+.t-idown { right: 12px; top: calc(12px + 2 * var(--tb) * 0.75 + 30px); }
+`
+		document.head.appendChild(css)
+
+		// --- ekran gry ---
+		tui = document.createElement("div")
+		tui.id = "touchui"
+		tui.className = "hidden"
+		tjoy = document.createElement("div")
+		tjoy.id = "tjoy"
+		tknob = document.createElement("div")
+		tknob.id = "tknob"
+		tjoy.appendChild(tknob)
+		tui.appendChild(tjoy)
+
+		tjoy.addEventListener("pointerdown", e => {
+			e.preventDefault()
+			if (joy.id !== null) return
+			joy.id = e.pointerId
+			try { tjoy.setPointerCapture(e.pointerId) } catch (x) { /* brak przechwytu */ }
+			const r = tjoy.getBoundingClientRect()
+			joy.cx = r.left + r.width / 2
+			joy.cy = r.top + r.height / 2
+			joy.r = r.width / 2
+			joyMove(e)
+		})
+		tjoy.addEventListener("pointermove", e => { if (e.pointerId === joy.id) joyMove(e) })
+		const joyEnd = e => { if (e.pointerId === joy.id) joyReset() }
+		tjoy.addEventListener("pointerup", joyEnd)
+		tjoy.addEventListener("pointercancel", joyEnd)
+		tjoy.addEventListener("lostpointercapture", joyEnd)
+
+		mkBtn(tui, "t-break", "⛏", () => tMouse(0, true), () => tMouse(0, false))
+		mkBtn(tui, "t-place", "▣", () => tMouse(2, true), () => tMouse(2, false))
+		mkBtn(tui, "t-jump", "▲", () => tKey(" ", true), () => tKey(" ", false)) // podwójne dotknięcie = lot
+		mkBtn(tui, "t-sneak", "▼", () => tKey("shift", true), () => tKey("shift", false)) // w locie: w dół
+		mkBtn(tui, "sm t-pause", "⏸", () => tTap("p"))
+		mkBtn(tui, "sm t-inv", "▤", () => tTap("e"))
+		mkBtn(tui, "sm t-mode", "◫", () => tTap("enter")) // blok / płyta / schody
+		document.body.appendChild(tui)
+
+		// --- ekwipunek ---
+		tinv = document.createElement("div")
+		tinv.id = "touchinv"
+		tinv.className = "hidden"
+		mkBtn(tinv, "sm t-iclose", "✕", () => tTap("e"))
+		mkBtn(tinv, "sm t-iup", "▲", () => { invScroll = Math.max(0, invScroll - 1); drawScreens.inventory() })
+		mkBtn(tinv, "sm t-idown", "▼", () => { invScroll = Math.min(invLayout().maxScroll, invScroll + 1); drawScreens.inventory() })
+		document.body.appendChild(tinv)
+
+		// --- rozglądanie się przeciąganiem palca + wybór slotu paska ---
+		canvas.addEventListener("pointerdown", e => {
+			if (!touchMode || screen !== "play") return
+			e.preventDefault() // bez tego przeglądarka dorzuca zdarzenia myszy
+			const s = inventory.size
+			const x0 = width / 2 - 9 / 2 * s + 25
+			if (e.clientY > height - s * 1.6 && e.clientX >= x0 && e.clientX < x0 + 9 * s) {
+				inventory.hotbarSlot = Math.floor((e.clientX - x0) / s)
+				holding = inventory.hotbar[inventory.hotbarSlot]
+				updateHUD = true
+				return
+			}
+			if (look.id !== null) return
+			look.id = e.pointerId
+			look.x = e.clientX
+			look.y = e.clientY
+			try { canvas.setPointerCapture(e.pointerId) } catch (x) { /* brak przechwytu */ }
+		})
+		canvas.addEventListener("pointermove", e => {
+			if (e.pointerId !== look.id) return
+			const k = settings.mouseSense / 30000 * TOUCH_LOOK
+			p.ry += (e.clientX - look.x) * k
+			p.rx -= (e.clientY - look.y) * k
+			look.x = e.clientX
+			look.y = e.clientY
+			while (p.ry > Math.PI * 2) p.ry -= Math.PI * 2
+			while (p.ry < 0) p.ry += Math.PI * 2
+			if (p.rx > Math.PI / 2) p.rx = Math.PI / 2
+			if (p.rx < -Math.PI / 2) p.rx = -Math.PI / 2
+		})
+		const lookEnd = e => { if (e.pointerId === look.id) look.id = null }
+		canvas.addEventListener("pointerup", lookEnd)
+		canvas.addEventListener("pointercancel", lookEnd)
+		canvas.addEventListener("lostpointercapture", lookEnd)
+
+		updateTouchUI()
+	}
 	function initEverything() {
 		console.log("Initializing world.")
 
@@ -6423,8 +6890,11 @@ function MineKhan() {
 
 		p.FOV(settings.fov)
 		initWorldsMenu()
+		initWorldsMenu()
 		initButtons()
+		initTouch()
 	}
+	
 
 	// Define all the scene draw functions
 	(function() {
