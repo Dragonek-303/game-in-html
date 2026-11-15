@@ -285,7 +285,7 @@ details textarea { margin: 8px 0; height: 110px; font-family: var(--font-mono); 
         <button type="button" data-scope="all" aria-pressed="false">Wszystkie</button>
       </div>
       <div id="codeBlocks"></div>
-      <p class="hint" id="itemNote" style="margin-top:12px" hidden>Przedmiot dostaje płaską ikonę w ekwipunku. Jego działanie po kliknięciu (jak zapalniczka stawiająca ogień) jest w kodzie gry, tutaj nie jest zmieniane.</p>
+      <p class="hint" id="itemNote" style="margin-top:12px" hidden>Przedmiot dostaje płaską ikonę w ekwipunku i nie da się go postawić jak blok (item: true). Jego działanie po kliknięciu (jak zapalniczka stawiająca ogień) jest w kodzie gry, tutaj nie jest zmieniane.</p>
       <p class="hint" id="mobNote" style="margin-top:12px" hidden>Mob ma dwie tekstury: <span class="mono">…Skin</span> (całe ciało) i <span class="mono">…Face</span> (przód głowy). Nie ma wpisu w <span class="mono">blockData</span>, bo moby rysuje osobny system. Kształt i zachowanie moba są w kodzie gry (<span class="mono">MOB_TYPES</span>).</p>
     </section>
   </div>
@@ -821,7 +821,7 @@ function hasAlpha(el) {
 /* ---------- kod ---------- */
 function blockLine(el) {
   var parts = ['name: "' + el.name + '"'];
-  if (el.kind === 'item') parts.push('special: true');
+  if (el.kind === 'item') parts.push('special: true', 'item: true');
   else if (el.mode === 'two') parts.push('textures: ["' + el.name + 'Top", "' + el.name + 'Side"]');
   else if (el.mode === 'three') parts.push('textures: ["' + el.name + 'Bottom", "' + el.name + 'Top", "' + el.name + 'Side"]');
   var f = el.flags;
