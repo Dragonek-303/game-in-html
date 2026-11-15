@@ -402,7 +402,10 @@ let textures = {
 		cowSkin: "0g0gz0p194ov0p1aj9b0pba4n30plb4lb0plb4sf0pvaq670q5bq4f0qfbbpb0qpcbnj0qzdblr0qzdbsv0r9cx6n0r9ebr30rjdx4v1n1wvlr1nbxvr31nlyvwf1nvzw1r1o60w731og1wcf1oq2whr1p03wn31pa4wsf1pu6x331q47x8f1qo9xj31qyaxof1r8bxtr1ricxz31rsdy4f1s2ey9r1scfyf31smgykf1swhypr1t6iyv3682pqc365888b888883tl8d82276d2828ddkf885dd8qj88455848d8d6d6ewo2diac5b39a6a22v8b0h8062922c80b20d8u487662ret18b256669ac08syn88268526620d0et0dd6d9269ddby209606a6595489xw558c69dd68c58vwm88220d8a2822bnof275da7d688b6uqa7dda64dc68hqmy08c24821560mfvrl8583c46883ghq",
 		cowFace: "0g0gz050i3un05aj3zz0n3270f0or3zlr0plb4lb0q5bq4f0qzdblr0r9ebr31dtjgu71e3kgsf1edlgxr1enmh331f7n2m71frno5b1frp2wv1g1q2v31gbpofz1gvroqn1h5soov1hfsa9r1hpta7z1hzuadb1og1wcf1p03wn31pa4wsf1pu6x331q47x8f1qo9xj31qyaxof1r8bxtr1ricxz31s2ey9r1scfyf31smgykf1t6iyv34647747xw75444744646777sm44744764465445qv77577556474657pu66745664665464to64577577471146py57117677740077py67117765454654yr66476555564676sn67767454775fh9djl8b55466766ai8hckbf64766666a83fd2ff44756776lcdekgge47554754flbikba9744766779bhjjcjh47457744646646657754",
 		pigEgg: "0g0g5000000015pfzsv1gtz08v1ur64u71xl7lrz0000000000000000000000000000000000000022220000000000223333220000000221433332200000023433333220000023333331432200002333333433220002333334333332200233143333333220023343333331322002333333143332200223333343332220002333333333220000022333333220000000222222220000",
-		cowEgg: "0g0g500000000b4n7cv0jgyy2n0ulkq2n1uamzgf0000000000000000000000000000000000000022220000000000223333220000000221433332200000023433333220000023333331432200002333333433220002333334333332200233143333333220023343333331322002333333143332200223333343332220002333333333220000022333333220000000222222220000"
+		cowEgg: "0g0g500000000b4n7cv0jgyy2n0ulkq2n1uamzgf0000000000000000000000000000000000000022220000000000223333220000000221433332200000023433333220000023333331432200002333333433220002333334333332200233143333333220023343333331322002333333143332200223333343332220002333333333220000022333333220000000222222220000",
+		zombieSkin: "0g0g60cuj3lr0ifedj30kns0lb0mw2uin0p4dofz0rclpmn5434443415414413454055202335550543352521450332521201253113435350515131143224505320345352132512331101224333132150235205154210002451131535305441044302522212513542253405542433330435511345235424254221155503545555104552312540411053222554534414211325451242510255",
+		zombieFace: "0g0gc064mcxr08ddrsv0b64npb0cuj3lr0fmyqkf0ifedj30kns0lb0mw2uin0p4dofz0rclpmn0xg4hdr18lmqyn56853759879599669697776697755667985699985666867778793788599795589862228789222595778bbb6868bbb597397000658700056886566655578673699857353449573796676575944566566985567796768756676679711111188658597661a11a163983378883979667759655957878788567958776533987897988",
+		zombieEgg: "0g0g5000000008dfkzj09ry8lb0jjpf5r0wx8lq70000000000000000000000000000000000000222222000000000223333220000000024433332000000023413333320000002333333332000000333313333300000233333313332000003333333333000000231333333200000023333331320000000233313320000000022333322000000000222222000000000000000000000"
 	}
 
 	let blockData = [
@@ -604,6 +607,7 @@ let textures = {
 	{ name: "trapdoor", transparent: true, shadow: false, special: true },
 	{ name: "pigEgg", special: true },
 	{ name: "cowEgg", special: true },
+	{ name: "zombieEgg", special: true },
 		
 	]
 	const BLOCK_COUNT = blockData.length;
@@ -2945,6 +2949,7 @@ let textures = {
 		drown: ["You drowned", "Utonąłeś"],
 		fire: ["You burned to death", "Spłonąłeś"],
 		fall: ["You hit the ground too hard", "Spadłeś z wysokości"],
+		mob: ["You were killed by a zombie", "Zabił cię zombie"],
 		other: ["You died", "Zginąłeś"]
 	}
 	const HEART = ["011000110", "111101111", "111111111", "111111111", "111111111", "011111110", "001111100", "000111000", "000010000"]
@@ -3575,7 +3580,7 @@ let textures = {
 		const cur = world.getBlock(x, y, z)
 		if ((cur && (cur & 0xff) !== blockIds.waterBlock) || y <= 0 || y >= maxHeight - 1) return
 		// nie stawiaj bloków w mobach (jajka, zapalniczka i bloki bez kolizji są wyjątkiem)
-		if (holding !== blockIds.lighter && holding !== blockIds.pigEgg && holding !== blockIds.cowEgg && !blockData[holding].noCollide
+		if (holding !== blockIds.lighter && !eggMobType(holding) && !blockData[holding].noCollide
 			&& (mobInBlock(x, y, z) || (holding === blockIds.oakDoorBottom && mobInBlock(x, y + 1, z)))) return
 
 		if (holding === blockIds.lighter) { // zapalniczka stawia ogień
@@ -3583,11 +3588,11 @@ let textures = {
 			p.lastPlace = Date.now()
 			return
 		}
-		if (holding === blockIds.pigEgg || holding === blockIds.cowEgg) {
+		if (eggMobType(holding)) {
 			// jajko działa tylko przy kliknięciu, nie przy trzymaniu przycisku
 			if (!click || world.mobs.length >= MOB_HARD_CAP) return
 			if (mobSolid(x, y + 1, z)) return // brak miejsca nad głową
-			spawnMob(holding === blockIds.pigEgg ? "pig" : "cow", x, y - 0.45, z)
+			spawnMob(eggMobType(holding), x, y - 0.45, z)
 			p.lastPlace = Date.now()
 			return
 		}
@@ -4570,6 +4575,17 @@ let textures = {
 			]
 		}
 	}
+	MOB_TYPES.zombie = {
+		hw: 0.25, h: 1.9, hp: 6, speed: 0.045, hostile: true, skin: "zombieSkin", face: "zombieFace",
+		parts: [
+			[-0.25, 0, -0.12, 0, 0.7, 0.12, 0, 1],      // lewa noga
+			[0, 0, -0.12, 0.25, 0.7, 0.12, 0, -1],      // prawa noga
+			[-0.25, 0.7, -0.14, 0.25, 1.4, 0.14, 0, 0], // tułów
+			[-0.25, 1.4, -0.25, 0.25, 1.9, 0.25, 1, 0], // głowa (z twarzą)
+			[-0.5, 1.12, -0.1, -0.25, 1.37, 0.65, 0, 0], // lewa ręka wyciągnięta do przodu
+			[0.25, 1.12, -0.1, 0.5, 1.37, 0.65, 0, 0]   // prawa ręka
+		]
+	}
 	// narożniki ścian (0 = min, 1 = max) w kolejności lewo-góra, prawo-góra, prawo-dół, lewo-dół + jasność
 	const MOB_FACES = [
 		{ c: [[0,1,1],[1,1,1],[1,0,1],[0,0,1]], s: 0.8 }, // przód (+z)
@@ -4604,10 +4620,12 @@ let textures = {
 		}
 		return false
 	}
-	function mobGroundAhead(x, y, z) { // czy przed mobem jest bezpieczny grunt (nie woda, nie głęboki dół)
+	function mobGroundAhead(x, y, z, maxDrop) {
+		const lim = maxDrop === undefined ? 3 : maxDrop // czy przed mobem jest bezpieczny grunt (nie woda, nie głęboki dół)
 		const cx = Math.round(x), cz = Math.round(z), cy = Math.round(y - 0.01)
-		for (let k = 0; k < 4; k++) {
+		for (let k = 0; k <= lim; k++) {
 			const s = world.getBlock(cx, cy - k, cz)
+			if ((s & 0xff) === blockIds.fire || (world.getBlock(cx, cy - k + 1, cz) & 0xff) === blockIds.fire) return false
 			if ((s & 0xff) === blockIds.waterBlock) return false
 			if (s && !blockData[s].noCollide) return true
 		}
@@ -4637,6 +4655,70 @@ let textures = {
 			timer: Math.random() * 2000, walking: false, panic: 0,
 			hp: MOB_TYPES[type].hp, onGround: false, anim: Math.random() * 10, amp: 0, hurt: 0, fallY: y
 		})
+	}
+	// ===== ZOMBIE: ustawienia =====
+	const ZOMBIE_SIGHT = 16          // zasięg widzenia (bloki)
+	const ZOMBIE_REACH = 1.3         // zasięg ataku (bloki)
+	const ZOMBIE_DAMAGE = 3          // 3 punkty = 1,5 serca
+	const ZOMBIE_COOLDOWN = 1000     // ms między atakami
+	const ZOMBIE_MAX = 2             // najwyżej tylu naraz
+	const ZOMBIE_SPAWN_CHANCE = 0.012 // szansa co 2,5 s (mniej = rzadziej)
+	// ===== ZOMBIE: omijanie przeszkód =====
+	const STEER_OFFSETS = [0, 0.5, -0.5, 1.0, -1.0, 1.6, -1.6, 2.4] // radiany względem kierunku do gracza
+	function mobStepOk(m, x, z) { // czy mob może bezpiecznie wejść w punkt (x, z)
+		if (!mobGroundAhead(x, m.y, z, 1)) return false // woda, głęboka dziura albo ogień
+		if (mobBlocked(m, x, m.y, z) && mobBlocked(m, x, m.y + 1, z)) return false // ściana wyższa niż 1 blok
+		return true
+	}
+	// zwraca bezpieczny kierunek najbliższy kierunkowi "want" albo null (stań w miejscu)
+	function steerMob(m, want, now) {
+		if (!m.stuckT || now > m.stuckT) { // zawieszony w miejscu? zmień stronę obejścia
+			if (m.stuckX !== undefined && Math.hypot(m.x - m.stuckX, m.z - m.stuckZ) < 0.15) {
+				m.steerSign = -(m.steerSign || 1)
+				m.steerT = 0
+			}
+			m.stuckX = m.x
+			m.stuckZ = m.z
+			m.stuckT = now + 600
+		}
+		if (now > (m.steerT || 0)) {
+			m.steerT = now + 150
+			const s = m.steerSign || 1
+			const far = m.t.hw + 0.5, near = m.t.hw + 0.2
+			m.steer = null
+			for (let i = 0; i < STEER_OFFSETS.length; i++) {
+				const a = want + STEER_OFFSETS[i] * s
+				const sx = Math.sin(a), sz = Math.cos(a)
+				if (mobStepOk(m, m.x + sx * near, m.z + sz * near) && mobStepOk(m, m.x + sx * far, m.z + sz * far)) {
+					m.steer = STEER_OFFSETS[i] * s
+					break
+				}
+			}
+		}
+		return m.steer === null || m.steer === undefined ? null : want + m.steer
+	}
+	function eggMobType(id) {
+		if (id === blockIds.pigEgg) return "pig"
+		if (id === blockIds.cowEgg) return "cow"
+		if (id === blockIds.zombieEgg) return "zombie"
+		return null
+	}
+	function trySpawnZombie() {
+		if (world.mobs.length >= MOB_HARD_CAP || Math.random() > ZOMBIE_SPAWN_CHANCE) return
+		let n = 0
+		for (const m of world.mobs) if (m.type === "zombie" && m.dying === undefined) n++
+		if (n >= ZOMBIE_MAX) return
+		const ang = Math.random() * Math.PI * 2
+		const dist = 20 + Math.random() * 16
+		const sx = Math.round(p.x + Math.cos(ang) * dist), sz = Math.round(p.z + Math.sin(ang) * dist)
+		const c = world.chunks[sx >> 4] && world.chunks[sx >> 4][sz >> 4]
+		if (!c || !c.loaded) return
+		const g = c.tops[(sz & 15) * 16 + (sx & 15)]
+		if (!superflat && g <= SEA_LEVEL + 1) return
+		const s = world.getBlock(sx, g, sz)
+		if (!s || (s & 0xff) === blockIds.waterBlock || !mobSolid(sx, g, sz)) return
+		if (world.getBlock(sx, g + 1, sz) || world.getBlock(sx, g + 2, sz)) return
+		spawnMob("zombie", sx, g + 0.5, sz)
 	}
 	function trySpawnHerd() {
 		const ang = Math.random() * Math.PI * 2
@@ -4727,6 +4809,7 @@ let textures = {
 		if (now > world.nextMobSpawn) {
 			world.nextMobSpawn = now + 2500
 			if (mobs.length < MAX_MOBS && Math.random() < 0.47) trySpawnHerd()
+			if (survival && !p.spectator && !p.dead) trySpawnZombie()
 		}
 
 		for (let i = mobs.length - 1; i >= 0; i--) {
@@ -4764,6 +4847,31 @@ let textures = {
 			if (m.jumpCd > 0) m.jumpCd -= dt * 33
 
 			// obrót
+			// zombie: goni i atakuje gracza tylko w survivalu
+			if (m.t.hostile && m.dying === undefined && survival && !p.dead && !p.spectator && !inWater) {
+				const pdx = p.x - m.x, pdz = p.z - m.z
+				const pd2 = pdx * pdx + pdz * pdz
+				if (pd2 < ZOMBIE_SIGHT * ZOMBIE_SIGHT && p.y - p.bottomH < m.y + t.h + 1 && p.y > m.y - 4) {
+					m.timer = 400
+					m.target = Math.atan2(pdx, pdz)
+					const want = m.target
+					m.walking = pd2 > 0.64
+					if (m.walking) {
+						const st = steerMob(m, want, now)
+						if (st === null) m.walking = false
+						else m.target = st
+					}
+					const pd = Math.sqrt(pd2)
+					if (pd < ZOMBIE_REACH && p.y - p.bottomH < m.y + t.h && p.y + p.topH > m.y && now > (m.atk || 0)) {
+						m.atk = now + ZOMBIE_COOLDOWN
+						hurtPlayer(ZOMBIE_DAMAGE, "mob")
+						if (pd > 0.01 && !p.flying) {
+							p.velocity.x += pdx / pd * 0.18
+							p.velocity.z += pdz / pd * 0.18
+						}
+					}
+				}
+			}
 			let diff = m.target - m.yaw
 			diff = Math.atan2(Math.sin(diff), Math.cos(diff))
 			m.yaw += diff * Math.min(1, 0.15 * dt)
@@ -4775,7 +4883,7 @@ let textures = {
 			// własny marsz omija wodę i przepaści, ale odrzut po uderzeniu może wrzucić moba do wody
 			if ((mvx || mvz) && m.onGround && !inWater) {
 				const look = t.hw + 0.35
-				if (!mobGroundAhead(m.x + Math.sin(m.yaw) * look, m.y, m.z + Math.cos(m.yaw) * look)) {
+				if (!mobGroundAhead(m.x + Math.sin(m.yaw) * look, m.y, m.z + Math.cos(m.yaw) * look, m.t.hostile ? 1 : 3)) {
 					mvx = 0
 					mvz = 0
 					m.target = m.yaw + Math.PI / 2 + Math.random() * Math.PI
@@ -4786,7 +4894,11 @@ let textures = {
 			m.kz *= kd
 
 			// ruch poziomy
-			const tx = m.x + (mvx + m.kx) * dt, tz = m.z + (mvz + m.kz) * dt
+			let tx = m.x + (mvx + m.kx) * dt, tz = m.z + (mvz + m.kz) * dt
+			if (mobBlocked(m, tx, m.y, tz) && mobBlocked(m, tx, m.y + 1, tz)) { // ślizgaj się wzdłuż jednej osi
+				if (!mobBlocked(m, tx, m.y, m.z)) tz = m.z
+				else if (!mobBlocked(m, m.x, m.y, tz)) tx = m.x
+			}
 			if (mobBlocked(m, tx, m.y, tz)) {
 				if (moving) {
 					if (!mobBlocked(m, tx, m.y + 1, tz)) { // da się wejść o jeden blok wyżej
@@ -4848,6 +4960,13 @@ let textures = {
 			}
 
 
+			// ogień pali moba
+			if (m.dying === undefined && (world.getBlock(Math.round(m.x), Math.round(m.y + 0.1), Math.round(m.z)) & 0xff) === blockIds.fire && now > (m.burnT || 0)) {
+				m.burnT = now + 1000
+				m.hp--
+				m.hurt = 450
+				if (m.hp <= 0) killMob(m)
+			}
 			// animacja nóg
 			m.amp += ((moving ? 1 : 0) - m.amp) * 0.2 * dt
 			if (moving) m.anim += (m.panic > 0 ? 0.5 : 0.25) * dt
@@ -4945,12 +5064,12 @@ let textures = {
 		if (!best) return false
 		best.hp--
 		p.lastAttack = Date.now()
-		best.panic = 2500
+		best.panic = best.t.hostile ? 0 : 2500
 		const ax = best.x - p.x, az = best.z - p.z, l = Math.hypot(ax, az) || 1
 		best.kx = ax / l * 0.18
 		best.kz = az / l * 0.18
-		best.target = Math.atan2(ax, az)
-		best.walking = true
+		if (!best.t.hostile) best.target = Math.atan2(ax, az)
+		if (!best.t.hostile) best.walking = true
 		best.hurt = 450 // czerwony przez ok. pół sekundy
 		if (best.onGround) best.vy = 0.17 // lekki podskok
 		p.lastBreak = Date.now()
