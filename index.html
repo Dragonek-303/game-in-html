@@ -6747,60 +6747,127 @@ let textures = {
 		text(str, 5, height - 77, 12)
 	}
 
-	let invListCache
+	// ===== KATEGORIE (zakładki z ikonami w kreatywnym) =====
+	const INV_CATS = [
+		{ id: "all", icon: "bookshelf", pl: "Wszystko", en: "All" },
+		{ id: "build", icon: "stoneBricks", pl: "Bloki budowlane", en: "Building blocks" },
+		{ id: "nature", icon: "grass", pl: "Natura", en: "Nature" },
+		{ id: "ores", icon: "diamondOre", pl: "Rudy i minerały", en: "Ores & minerals" },
+		{ id: "wood", icon: "oakLog", pl: "Drewno", en: "Wood" },
+		{ id: "color", icon: "redWool", pl: "Kolorowe bloki", en: "Colored blocks" },
+		{ id: "deco", icon: "torch", pl: "Dekoracje i wyposażenie", en: "Decoration & utility" },
+		{ id: "tools", icon: "ironPickaxe", pl: "Narzędzia", en: "Tools" },
+		{ id: "mats", icon: "ironIngot", pl: "Materiały", en: "Materials" },
+		{ id: "eggs", icon: "pigEgg", pl: "Jajka przywołujące", en: "Spawn eggs" },
+		{ id: "bag", icon: "craftingTable", pl: "Ekwipunek", en: "Inventory" }
+	]
+	function invCatOf(i) {
+		const d = blockData[i], n = d.name
+		if (d.toolType || n === "lighter") return "tools"
+		if (/Egg$/.test(n)) return "eggs"
+		if (d.item) return "mats"
+		if (/Ore$/.test(n) || /^(coal|iron|gold|diamond|redstone|lapis|emerald)Block$/.test(n)) return "ores"
+		if (/Wool$|Concrete$|Terracotta$|StainedGlass$/.test(n)) return "color"
+		if (/Planks$|Log$/.test(n)) return "wood"
+		if (/^(bookshelf|glass|ironBars|torch|ladder|trapdoor|oakDoorBottom|craftingTable|glowstone)$/.test(n)) return "deco"
+		if (/^(grass|dirt|stone|bedrock|sand|gravel|leaves|justLeaves|grassLeaves|iceBlick|cobwebBlick|netherrack|soulSand|netherWartBlock|waterBlock)$/.test(n)) return "nature"
+		return "build"
+	}
+	let invListCache = {}
 	function invList() {
-		if (!invListCache) {
-			invListCache = []
+		const cat = invTab === "bag" ? "all" : invTab
+		if (!invListCache[cat]) {
+			const l = invListCache[cat] = []
 			for (let i = 1; i < BLOCK_COUNT; i++) {
-				if (!blockData[i].hidden) invListCache.push(i)
+				if (!blockData[i].hidden && (cat === "all" || invCatOf(i) === cat)) l.push(i)
 			}
 		}
-		return invListCache
+		return invListCache[cat]
 	}
 	let invScroll = 0
 	function invLayout() { // ile rzędów mieści się nad hotbarem i ile można przewinąć
 		const s = inventory.size
 		const perRow = 13
-		const top = 50 - s / 2
+		const top = 50 - s / 2 + invTopOff()
 		const rows = Math.max(3, Math.floor((height - s * 1.5 - top - 10) / s))
 		const total = Math.ceil(invList().length / perRow)
 		return { perRow, rows, maxScroll: Math.max(0, total - rows) }
 	}
 	// ===== EKWIPUNEK: ZAKŁADKI, SLOTY, CRAFTING 2x2 / STÓŁ 3x3 =====
-	let invTab = "blocks" // tylko kreatywny: "blocks" = wszystkie bloki, "bag" = ekwipunek
+	let invTab = "all" // tylko kreatywny: id kategorii (all, build, nature, ...) albo "bag" = ekwipunek
 	let invTable = false  // true, gdy ekran otwarto prawym kliknięciem w stół rzemieślniczy (siatka 3x3)
 	function craftDim() { return invTable ? 3 : 2 }
-	function invMode() { return survival || invTable ? "bag" : invTab }
+	function invMode() { return survival || invTable ? "bag" : (invTab === "bag" ? "bag" : "blocks") }
 	function openTable() {
 		invTable = true
 		changeScene("inventory")
 		releasePointer()
 	}
+	function invTopOff() { // o ile siatka bloków jest przesunięta w dół, żeby zmieścić rząd zakładek (tylko kreatywny)
+		if (survival || invTable) return 0
+		const s = inventory.size, th = Math.round(s * 0.95)
+		return Math.max(0, th + 8 - 50 + Math.round(s / 2))
+	}
 	function invTabRects() {
-		const s = inventory.size, top = 50 - s / 2
-		const y = Math.max(2, top - 27), x = 50 - s / 2
-		const en = currentLanguage === "English"
-		return [
-			{ id: "blocks", x: x, y: y, w: 150, h: 24, t: en ? "All blocks" : "Wszystkie bloki" },
-			{ id: "bag", x: x + 156, y: y, w: 130, h: 24, t: en ? "Inventory" : "Ekwipunek" }
-		]
+		const s = inventory.size, th = Math.round(s * 0.95), en = currentLanguage === "English"
+		const y = Math.max(2, 50 - s / 2 + invTopOff() - th - 4), x0 = 50 - s / 2
+		return INV_CATS.map((c, i) => ({ id: c.id, icon: c.icon, x: x0 + i * (th + 3), y: y, w: th, h: th, t: en ? c.en : c.pl }))
 	}
 	function invTabAt(mx, my) {
 		for (const t of invTabRects()) if (mx >= t.x && mx <= t.x + t.w && my >= t.y && my <= t.y + t.h) return t.id
 		return null
 	}
 	function drawInvTabs() {
-		ctx.font = "14px Poppins"
-		ctx.textAlign = "center"
-		for (const t of invTabRects()) {
+		const tabs = invTabRects(), s = inventory.size
+		for (const t of tabs) { // tła
 			const on = t.id === invTab
-			ctx.fillStyle = on ? "rgb(165, 165, 165)" : "rgb(85, 85, 85)"
+			ctx.fillStyle = on ? "rgb(190, 190, 190)" : "rgb(85, 85, 85)"
 			ctx.fillRect(t.x, t.y, t.w, t.h)
 			ctx.lineWidth = 2
 			ctx.strokeStyle = on ? "white" : "black"
-			ctx.strokeRect(t.x, t.y, t.w, t.h)
+			ctx.strokeRect(t.x + 1, t.y + 1, t.w - 2, t.h - 2)
+		}
+		gl.clearColor(0, 0, 0, 0) // ikony rysuje GL, potem są doklejane do płótna
+		gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+		FOV(90)
+		for (const t of tabs) if (blockIds[t.icon] !== undefined) drawIcon(t.x + t.w / 2, t.y + t.h / 2, blockIds[t.icon])
+		ctx.drawImage(gl.canvas, 0, 0)
+		ctx.font = "bold 15px Poppins"
+		ctx.textAlign = "left"
+		const cur = tabs.find(t => t.id === invTab), last = tabs[tabs.length - 1]
+		if (cur) { // nazwa aktywnej kategorii
+			const lx = last.x + last.w + 12
+			if (lx + ctx.measureText(cur.t).width < width - 8) {
+				ctx.fillStyle = "#000"
+				ctx.fillText(cur.t, lx + 1, last.y + last.h / 2 + 6)
+				ctx.fillStyle = "#fff"
+				ctx.fillText(cur.t, lx, last.y + last.h / 2 + 5)
+			}
+		}
+		if (invMode() === "blocks") { // suwak pozycji w kategorii
+			const L = invLayout(), top = 50 - s / 2 + invTopOff(), h = L.rows * s, x = 50 - s / 2 + L.perRow * s + 6
+			if (L.maxScroll > 0) {
+				const total = L.maxScroll + L.rows, th = Math.max(18, h * L.rows / total)
+				ctx.fillStyle = "rgba(0, 0, 0, 0.45)"
+				ctx.fillRect(x, top, 7, h)
+				ctx.fillStyle = "rgb(210, 210, 210)"
+				ctx.fillRect(x, top + (h - th) * invScroll / L.maxScroll, 7, th)
+			}
+		}
+		const ov = invTabAt(mouseX, mouseY)
+		if (ov) { // podpowiedź z nazwą kategorii
+			const t = tabs.find(q => q.id === ov)
+			ctx.font = "14px Poppins"
+			const w = ctx.measureText(t.t).width + 16
+			let x = mouseX + 14, y = mouseY + 20
+			if (x + w > width - 2) x = width - w - 2
+			ctx.fillStyle = "rgba(16, 0, 16, 0.93)"
+			ctx.fillRect(x, y, w, 24)
+			ctx.lineWidth = 2
+			ctx.strokeStyle = "rgb(70, 24, 130)"
+			ctx.strokeRect(x + 1, y + 1, w - 2, 22)
 			ctx.fillStyle = "#fff"
-			ctx.fillText(t.t, t.x + t.w / 2, t.y + 17)
+			ctx.fillText(t.t, x + 8, y + 17)
 		}
 		ctx.textAlign = "left"
 		textSize(10)
@@ -6818,7 +6885,7 @@ let textures = {
 	function bagGeom() {
 		const s = inventory.size, d = craftDim()
 		const hx = width / 2 - 4.5 * s + 25, hy = height - s * 1.5
-		const gx = 50 - s / 2, gy = 50 - s / 2 + 28
+		const gx = 50 - s / 2, gy = 50 - s / 2 + (invTopOff() ? invTopOff() + 22 : 28)
 		return { s: s, d: d, hx: hx, hy: hy, gx: gx, gy: gy, cx: gx + (d === 3 ? 5 : 7) * s, cy: gy + 0.5 * s }
 	}
 	function bagSlots() {
@@ -6964,8 +7031,75 @@ let textures = {
 			R.push({ shape: [[M], [S], [S]], out: [id(n + "Shovel"), 1] })
 			R.push({ shape: [[M], [M], [S]], out: [id(n + "Sword"), 1] })
 		}
+		// ===== BRAKUJĄCE RECEPTURY =====
+		const B = n => blockIds[n]
+		const shaped = (shape, name, n) => { if (have(name)) R.push({ shape: shape, out: [B(name), n || 1] }) }
+		const less = (items, name, n) => { if (have(name)) R.push({ less: items, out: [B(name), n || 1] }) } // bezkształtna: kolejność dowolna
+		const grid2 = x => [[x, x], [x, x]]
+		const grid3 = x => [[x, x, x], [x, x, x], [x, x, x]]
+		const LEAVES = ["leaves", "justLeaves", "grassLeaves"].filter(have).map(B)
+		// bloki rud i przedmioty
+		for (const pr of [["coal", "coalBlock"], ["ironIngot", "ironBlock"], ["goldIngot", "goldBlock"], ["diamond", "diamondBlock"],
+			["redstone", "redstoneBlock"], ["lapis", "lapisBlock"], ["emerald", "emeraldBlock"]]) {
+			if (!have(pr[0]) || !have(pr[1])) continue
+			shaped(grid3(B(pr[0])), pr[1], 1)
+			shaped([[B(pr[1])]], pr[0], 9)
+		}
+		// kamień (jeden przedmiot w siatce = wypalanie, bo nie ma jeszcze pieca)
+		shaped([[B("cobblestone")]], "stone")
+		shaped([[B("stone")]], "smoothStone")
+		shaped(grid2(B("stone")), "stoneBricks", 4)
+		shaped([[B("stoneBricks")]], "crackedStoneBrick")
+		shaped([[B("stoneBricks"), B("stoneBricks")]], "chiseledStoneBricks")
+		less([B("cobblestone"), LEAVES], "mossyCobble")
+		less([B("stoneBricks"), LEAVES], "mossyStoneBricks")
+		less([B("diorite"), B("cobblestone")], "andesite", 2)
+		shaped([[B("cobblestone"), B("netherQuartz")], [B("netherQuartz"), B("cobblestone")]], "diorite", 2)
+		less([B("diorite"), B("netherQuartz")], "granite")
+		for (const n of ["Andesite", "Diorite", "Granite"]) shaped(grid2(B(n.toLowerCase())), "polished" + n, 4)
+		// piaskowiec, szkło, kwarc
+		shaped(grid2(B("sand")), "sandStone")
+		shaped([[B("sandStone")]], "smoothSandStone")
+		shaped([[B("sandStone"), B("sandStone")]], "chiseledSandStone")
+		shaped([[B("sand")]], "glass")
+		shaped(grid2(B("netherQuartz")), "quartzBlock")
+		shaped([[B("quartzBlock")], [B("quartzBlock")]], "quartzPillar", 2)
+		shaped([[B("quartzBlock"), B("quartzBlock")]], "chiseledQuartzBlock")
+		// terakota, cegły
+		shaped(grid2(B("dirt")), "whiteTerracotta")
+		shaped(grid2(B("whiteTerracotta")), "bricks")
+		shaped(grid2(B("netherrack")), "netherBricks")
+		shaped([[B("netherWartBlock"), B("netherBricks")], [B("netherBricks"), B("netherWartBlock")]], "redNetherBricks")
+		// drewno i wyposażenie
+		shaped([[PLANKS, PLANKS, PLANKS], [LEAVES, LEAVES, LEAVES], [PLANKS, PLANKS, PLANKS]], "bookshelf")
+		shaped([[S, 0, S], [S, S, S], [S, 0, S]], "ladder", 3)
+		shaped([[PLANKS, PLANKS, PLANKS], [PLANKS, PLANKS, PLANKS]], "trapdoor", 2)
+		shaped([[PLANKS, PLANKS], [PLANKS, PLANKS], [PLANKS, PLANKS]], "oakDoorBottom", 3)
+		shaped([[B("ironIngot"), B("ironIngot"), B("ironIngot")], [B("ironIngot"), B("ironIngot"), B("ironIngot")]], "ironBars", 16)
+		less([B("ironIngot"), B("gravel")], "lighter")
+		shaped([[B("glass"), B("glass"), B("glass")], [B("glass"), B("coal"), B("glass")], [B("glass"), B("glass"), B("glass")]], "blackStainedGlass", 8)
+		// wełna i beton (barwniki zastępują rudy: czerwony kamień = czerwony, lapis = niebieski, szmaragd = zielony, węgiel = czarny, złoto = żółty, kwarc = biały)
+		const RS = B("redstone"), LZ = B("lapis"), EM = B("emerald"), CO = B("coal"), AU = B("goldIngot"), QZ = B("netherQuartz")
+		shaped(grid2(LEAVES), "whiteWool")
+		const DYES = { orange: [RS, AU], magenta: [RS, RS, LZ, QZ], lightBlue: [LZ, QZ], yellow: [AU], lime: [EM, QZ], pink: [RS, QZ],
+			gray: [CO, QZ], lightGray: [CO, QZ, QZ], cyan: [LZ, EM], purple: [RS, LZ], blue: [LZ], brown: [RS, EM], green: [EM], red: [RS], black: [CO] }
+		for (const col of ["white"].concat(Object.keys(DYES))) {
+			if (col !== "white") less([B("whiteWool")].concat(DYES[col]), col + "Wool")
+			const SA = B("sand"), GR = B("gravel")
+			less([SA, SA, SA, SA, GR, GR, GR, GR, B(col + "Wool")], col + "Concrete", 8) // 4 piasku + 4 żwiru + wełna tego koloru -> 8 betonu
+		}
 		recipeCache = R
 		return R
+	}
+	function lessMatch(want, hv, used, i) { // receptura bezkształtna: czy składniki da się dopasować do przedmiotów w siatce
+		if (i === want.length) return true
+		for (let j = 0; j < hv.length; j++) {
+			if (used[j] || !cellMatch(want[i], hv[j])) continue
+			used[j] = true
+			if (lessMatch(want, hv, used, i + 1)) return true
+			used[j] = false
+		}
+		return false
 	}
 	function cellMatch(want, id) {
 		if (want === 0) return !id
@@ -6984,6 +7118,11 @@ let textures = {
 			}
 		}
 		if (r1 < 0) return null
+		const flat = []
+		for (let r = 0; r < d; r++) for (let cc = 0; cc < d; cc++) if (c[r * 3 + cc]) flat.push(c[r * 3 + cc])
+		for (const rec of recipes()) {
+			if (rec.less && rec.less.length === flat.length && lessMatch(rec.less, flat, [], 0)) return { id: rec.out[0], n: rec.out[1] }
+		}
 		const h = r1 - r0 + 1, w = c1 - c0 + 1
 		const grid = []
 		for (let r = 0; r < h; r++) {
@@ -6992,6 +7131,7 @@ let textures = {
 			grid.push(row)
 		}
 		for (const rec of recipes()) {
+			if (rec.less) continue
 			if (rec.shape.length !== h || rec.shape[0].length !== w) continue
 			for (let mirror = 0; mirror < 2; mirror++) {
 				let ok = true
@@ -7168,8 +7308,8 @@ let textures = {
 			return inventory.hotbar[i] ? [inventory.hotbar[i], inventory.counts[i]] : null
 		}
 		const list = invList(), L = invLayout(), perRow = 13, s2 = s / 2
-		const over = (Math.round((mouseY - 50) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
-		if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
+		const over = (Math.round((mouseY - 50 - invTopOff()) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
+		if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY > 50 - s2 + invTopOff() && mouseY < 50 - s2 + invTopOff() + L.rows * s) {
 			const id = list[over]
 			return [id, isTool(id) ? maxDur(id) : 1]
 		}
@@ -7219,7 +7359,7 @@ let textures = {
 	function clickInv(button, shift) {
 		if (!survival && !invTable) {
 			const t = invTabAt(mouseX, mouseY)
-			if (t) { invTab = t; drawScreens.inventory(); return }
+			if (t) { if (t !== invTab) invScroll = 0; invTab = t; drawScreens.inventory(); return }
 		}
 		if (invMode() === "bag") clickBag(button, shift)
 		else clickBlocksInv(button, shift)
@@ -7233,6 +7373,7 @@ let textures = {
 		let perRow = 13
 		const L = invLayout()
 		invScroll = Math.min(invScroll, L.maxScroll)
+		const oy = invTopOff()
 
 		gl.clearColor(0, 0, 0, 0)
 		gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
@@ -7245,13 +7386,13 @@ let textures = {
 		ctx.strokeStyle = "black"
 		ctx.beginPath()
 		for (y = 0; y <= L.rows; y++) {
-			ctx.moveTo(50.5 - s2, 50.5 - s2 + y * s)
-			ctx.lineTo(50.5 - s2 + s * perRow, 50.5 - s2 + y * s)
+			ctx.moveTo(50.5 - s2, 50.5 - s2 + oy + y * s)
+			ctx.lineTo(50.5 - s2 + s * perRow, 50.5 - s2 + oy + y * s)
 		}
 		y--
 		for (x = 0; x < perRow + 1; x++) {
-			ctx.moveTo(50.5 - s2 + s * x, 50.5 - s2)
-			ctx.lineTo(50.5 - s2 + s * x, 50.5 - s2 + y * s)
+			ctx.moveTo(50.5 - s2 + s * x, 50.5 - s2 + oy)
+			ctx.lineTo(50.5 - s2 + s * x, 50.5 - s2 + oy + y * s)
 		}
 
 		// Hotbar
@@ -7277,10 +7418,10 @@ let textures = {
 		}
 
 		//Box highlight in inv
-		let overInv = (Math.round((mouseY - 50) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
-		if (overInv >= 0 && overInv < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
+		let overInv = (Math.round((mouseY - 50 - invTopOff()) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
+		if (overInv >= 0 && overInv < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY > 50 - s2 + invTopOff() && mouseY < 50 - s2 + invTopOff() + L.rows * s) {
 			x = overInv % perRow * s + 50 - s2
-			y = ((overInv / perRow | 0) - invScroll) * s + 50 - s2
+			y = ((overInv / perRow | 0) - invScroll) * s + 50 - s2 + oy
 			ctx.lineWidth = 2
 			ctx.strokeStyle = "white"
 			ctx.beginPath()
@@ -7292,7 +7433,7 @@ let textures = {
 		}
 		for (let i = invScroll * perRow; i < list.length && i < (invScroll + L.rows) * perRow; i++) {
 			x = i % perRow * s + 50
-			y = ((i / perRow | 0) - invScroll) * s + 50
+			y = ((i / perRow | 0) - invScroll) * s + 50 + oy
 			drawIcon(x, y, list[i])
 		}
 
@@ -7307,7 +7448,7 @@ let textures = {
 		let s2 = s / 2
 		let perRow = 13
 		const L = invLayout()
-		let over = (Math.round((mouseY - 50) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
+		let over = (Math.round((mouseY - 50 - invTopOff()) / s) + invScroll) * perRow + Math.round((mouseX - 50) / s)
 		let x = width / 2 - 9 / 2 * s + 25
 		let y = height - s * 1.5
 		let overHot = (mouseX - x) / s | 0
@@ -7328,7 +7469,7 @@ let textures = {
 			}
 			holding = inventory.hotbar[inventory.hotbarSlot]
 			updateHUD = true
-		} else if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY < 50 - s2 + L.rows * s) {
+		} else if (over >= 0 && over < list.length && mouseX < 50 - s2 + perRow * s && mouseX > 50 - s2 && mouseY > 50 - s2 + invTopOff() && mouseY < 50 - s2 + invTopOff() + L.rows * s) {
 			if (button === 2) { // PPM: -1 z przenoszonego stosu
 				if (inventory.holding === list[over] && inventory.holdCount > 0 && !isTool(inventory.holding)) {
 					if (--inventory.holdCount <= 0) { inventory.holding = 0; inventory.holdCount = 0 }
