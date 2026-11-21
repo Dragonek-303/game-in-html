@@ -191,7 +191,7 @@
 		void main(void){
 			vec4 color = texture2D(uSampler, vTexture);
 			vec3 rgb = color.rgb * vShadow;
-			rgb = mix(rgb, vec3(1.0, 0.15, 0.15), uHurt * 0.6);
+			rgb = uHurt > 1.5 ? mix(rgb, vec3(1.0), 0.7) : mix(rgb, vec3(1.0, 0.15, 0.15), uHurt * 0.6);
 			gl_FragColor = fog(vec4(rgb, color.a));
 			if (gl_FragColor.a == 0.0) discard;
 		}
@@ -461,6 +461,13 @@ let textures = {
 		cookedPork: "0g0g600000000jgjfgf0w96z9b1ba5drz1lb5h4v1sl7k730000000000000000000000000000000000000000000000000000000000000000000022200000000000023332222200000001333334442000000211353333320000243111355333200023333111334420002444333111342000023333334112000000255555555000000002222222000000000000000000000000000000000000",
 		rawBeef: "0g0g500000000xvkcfz1cvw9331mcudq71vxmnen0000000000000000000000000000000000000000000000000000000000000000000011100000000000012221111100000001222222221000000132342223210000122223244222100012223323232210001232323222221000013332223221000000144444444000000001111111000000000000000000000000000000000000",
 		steak: "0g0g600000000jgjfgf0nwldrz0zl248v1a5vqin1lcbta70000000000000000000000000000000000000000000000000000000000000000000022200000000000023332222200000001433333332000000211353433420000233111355333200023333111334320002343333111332000023433344112000000255555555000000002222222000000000000000000000000000000000000",
+		tntTop: "0g0g70eh22nz0xek4qn1cvfabj1gc50qn1ikd1xb1ksl33z1nl0rnj2222222222222222266666666666666226444454345444622643444544554362263545353443456226344353444444622643445113534462263354100134546226454510014554622644354114344462264354445444446226444444543545622645444354434362263554534443456226666666666666622222222222222222",
+		tntBottom: "0g0g51cvfabj1gc50qn1ikd1xb1ksl33z1nl0rnj0000000000000000044444444444444004222232123222400421222322332140041323131221234004122131222222400421223211312240041132222312324004232332322332400422132212122240042132223222224004222222321323400423222132212140041332312221234004444444444444400000000000000000",
+		tntSide: "0g0g90cj97gf12vfta718fdbzz1grb01r1gx29dr1jjdzpb1mbgzcv1p9wdtr1sm8flr1111111111111111233325362655263325632555233625632355266623552355444444444444444478000808080008887770880008807887788088000770878887808807087077888780770808808788788788887888888844444444444444442663233326562663253625362535255526652655255625551111111111111111",
+		creeperSkin: "0g0g60b7at4v0ek0ven0hcrrb30kpf18f0olvw1r0t294vz2144311443234213320154234203212544343253130511412413553343032210444134443335343221131150300454335221145233332350143041235154345343121024454330522224254243432331421511242131313233534402441031442103302221144243433323311143344024415141151135341002333242351420",
+		creeperFace: "0g0g703wpatb0b7at4v0ek0ven0hcrrb30kpf18f0olvw1r0t294vz3255422554345324431265345314323655454364241622523524664454143321550000554400004332000061410000446300006344000061250000346200006454232100005441633335360000543442532600000000424344640000000042553214003332005354544400422200455135520052260046452113444353462531",
+		creeperEgg: "0g0g5000000003wpatb066kc8v0nhrw8v18msu0v0000000000000000000000000000000000000222222000000000223333220000000024433332000000023413333320000002333333332000000333313333300000233333313332000003333333333000000231333333200000023333331320000000233313320000000022333322000000000222222000000000000000000000",
+		gunpowder: "0g0g500000000a106bj0ehg8ov0jhybr30p2iepr0000000000000000000000000000000000000000000000000000000000000000000000024000000000000033230000000000003223000000000002231330000000002132234200000004332224333000003442331431230000232443134333000134244113342320243231233111333100003000300300000000000000000000",
 		woodPickaxe: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000055555500000000011113355000000000000013550000000000004135000000000004203500000000004200150000000004200015000000004200001500000004200000100000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
 		woodAxe: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000005555000000000003333555000000000033331500000000003331100000000000031100000000000004100000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
 		woodShovel: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000000005555000000000001355500000000000333330000000000033331000000000001331000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
@@ -721,7 +728,10 @@ let textures = {
 		{ name: "rawPork", special: true, item: true },
 		{ name: "cookedPork", special: true, item: true },
 		{ name: "rawBeef", special: true, item: true },
-		{ name: "steak", special: true, item: true }
+		{ name: "steak", special: true, item: true },
+		{ name: "tnt", textures: ["tntTop", "tntBottom", "tntSide", "tntSide", "tntSide", "tntSide"] },
+		{ name: "creeperEgg", special: true },
+		{ name: "gunpowder", special: true, item: true }
 	)
 	const BLOCK_COUNT = blockData.length;
 
@@ -3103,6 +3113,7 @@ let textures = {
 		fire: ["You burned to death", "Spłonąłeś"],
 		fall: ["You hit the ground too hard", "Spadłeś z wysokości"],
 		mob: ["You were killed by a zombie", "Zabił cię zombie"],
+		explosion: ["You blew up", "Wysadziło cię w powietrze"],
 		other: ["You died", "Zginąłeś"]
 	}
 	const HEART = ["011000110", "111101111", "111111111", "111111111", "111111111", "011111110", "001111100", "000111000", "000010000"]
@@ -3317,7 +3328,7 @@ let textures = {
 		// [wzór nazwy, twardość, narzędzie, czy WYMAGA narzędzia do dropu, minimalny poziom narzędzia]
 		// poziomy: 0 drewno/złoto, 1 kamień, 2 żelazo, 3 diament
 		[/^(waterBlock|bedrock)$/, Infinity, null, false, 0], // nie do wykopania
-		[/^(fire|torch)$/, 0, null, false, 0],
+		[/^(fire|torch|tnt)$/, 0, null, false, 0],
 		[/eaves$/, 0.2, null, false, 0],
 		[/lass$/, 0.3, null, false, 0],
 		[/^(grass|dirt|sand|gravel|soulSand)$/, 0.55, "shovel", false, 0],
@@ -3791,6 +3802,10 @@ let textures = {
 		if (!hitBox.pos || !holding || blockData[holding].item) return
 		let pos = hitBox.pos, x = pos[0], y = pos[1], z = pos[2]
 		const target = world.getBlock(x, y, z) // blok, w który celujesz
+		if (holding === blockIds.lighter && (target & 0xff) === blockIds.tnt) { // zapalniczka zapala TNT
+			if (click) { tntIgnite(x, y, z, TNT_FUSE); p.lastPlace = Date.now() }
+			return
+		}
 		if (isDoor(target) || isTrapdoor(target)) return // PPM otwiera
 		const face = hitBox.face
 		switch (face) {
@@ -4814,6 +4829,17 @@ let textures = {
 			[0.25, 1.12, -0.1, 0.5, 1.37, 0.65, 0, 0]   // prawa ręka
 		]
 	}
+	MOB_TYPES.creeper = {
+		hw: 0.3, h: 1.7, hp: 20, speed: 0.047, hostile: true, creeper: true, skin: "creeperSkin", face: "creeperFace",
+		parts: [
+			[-0.25, 0, 0.125, 0, 0.375, 0.375, 0, 1],       // lewa przednia noga
+			[0, 0, 0.125, 0.25, 0.375, 0.375, 0, -1],       // prawa przednia noga
+			[-0.25, 0, -0.375, 0, 0.375, -0.125, 0, -1],    // lewa tylna noga
+			[0, 0, -0.375, 0.25, 0.375, -0.125, 0, 1],      // prawa tylna noga
+			[-0.25, 0.375, -0.125, 0.25, 1.125, 0.125, 0, 0], // tułów
+			[-0.25, 1.125, -0.25, 0.25, 1.625, 0.25, 1, 0]  // głowa (z twarzą)
+		]
+	}
 	// narożniki ścian (0 = min, 1 = max) w kolejności lewo-góra, prawo-góra, prawo-dół, lewo-dół + jasność
 	const MOB_FACES = [
 		{ c: [[0,1,1],[1,1,1],[1,0,1],[0,0,1]], s: 0.8 }, // przód (+z)
@@ -4929,6 +4955,7 @@ let textures = {
 		if (id === blockIds.pigEgg) return "pig"
 		if (id === blockIds.cowEgg) return "cow"
 		if (id === blockIds.zombieEgg) return "zombie"
+		if (id === blockIds.creeperEgg) return "creeper"
 		return null
 	}
 	function trySpawnZombie() {
@@ -4947,6 +4974,28 @@ let textures = {
 		if (!s || (s & 0xff) === blockIds.waterBlock || !mobSolid(sx, g, sz)) return
 		if (world.getBlock(sx, g + 1, sz) || world.getBlock(sx, g + 2, sz)) return
 		spawnMob("zombie", sx, g + 0.5, sz)
+	}
+	// ===== CREEPER =====
+	const CREEPER_FUSE = 1500   // ms od podejścia do wybuchu
+	const CREEPER_R = 3         // promień wybuchu
+	const CREEPER_MAX = 2       // najwyżej tylu naraz
+	const CREEPER_SPAWN_CHANCE = 0.01
+	function trySpawnCreeper() {
+		if (world.mobs.length >= MOB_HARD_CAP || Math.random() > CREEPER_SPAWN_CHANCE) return
+		let n = 0
+		for (const m of world.mobs) if (m.type === "creeper" && m.dying === undefined) n++
+		if (n >= CREEPER_MAX) return
+		const ang = Math.random() * Math.PI * 2
+		const dist = 20 + Math.random() * 16
+		const sx = Math.round(p.x + Math.cos(ang) * dist), sz = Math.round(p.z + Math.sin(ang) * dist)
+		const c = world.chunks[sx >> 4] && world.chunks[sx >> 4][sz >> 4]
+		if (!c || !c.loaded) return
+		const g = c.tops[(sz & 15) * 16 + (sx & 15)]
+		if (!superflat && g <= SEA_LEVEL + 1) return
+		const s = world.getBlock(sx, g, sz)
+		if (!s || (s & 0xff) === blockIds.waterBlock || !mobSolid(sx, g, sz)) return
+		if (world.getBlock(sx, g + 1, sz) || world.getBlock(sx, g + 2, sz)) return
+		spawnMob("creeper", sx, g + 0.5, sz)
 	}
 	function trySpawnHerd() {
 		const ang = Math.random() * Math.PI * 2
@@ -5027,6 +5076,230 @@ let textures = {
 		}
 	}
 
+	// ===== SPADAJĄCE BLOKI (piasek, żwir), TNT I ODŁAMKI =====
+	const TNT_R = 4          // promień wybuchu (bloki)
+	const TNT_FUSE = 4000    // lont zapalonego TNT (ms)
+	function isFaller(id) { return id === blockIds.sand || id === blockIds.gravel }
+	function loadedAt(x, z) { const c = world.chunks[x >> 4] && world.chunks[x >> 4][z >> 4]; return !!(c && c.loaded) }
+	function airish(s) { // przez to blok może spadać, a TNT przelatywać
+		if (!s) return true
+		const id = s & 0xff
+		if (id === blockIds.waterBlock || id === blockIds.fire) return true
+		const d = blockData[id]
+		return !!(d && d.noCollide)
+	}
+	function entList() { return world.ents || (world.ents = []) }
+	function fallNotify(w, x, y, z) { // każda zmiana bloku: sprawdź ją i blok nad nią
+		const q = w.fallQ || (w.fallQ = [])
+		if (q.length < 6000) q.push(x, y, z, x, y + 1, z)
+	}
+	function startFall(x, y, z, id) {
+		world.setBlock(x, y, z, 0)
+		entList().push({ k: "fall", id: id, x: x, y: y, z: z, vx: 0, vy: 0, vz: 0 })
+	}
+	function tntIgnite(x, y, z, fuse) {
+		world.setBlock(x, y, z, 0)
+		const a = Math.random() * Math.PI * 2
+		entList().push({ k: "tnt", id: blockIds.tnt, x: x, y: y, z: z, vx: Math.sin(a) * 0.02, vy: 0.2, vz: Math.cos(a) * 0.02, fuse: fuse })
+	}
+	function explosionDamage(dist, R) { // jak w Minecrafcie: do 2R od środka, im bliżej tym mocniej
+		if (dist >= 2 * R) return 0
+		const imp = 1 - dist / (2 * R)
+		return Math.round((imp * imp + imp) / 2 * 7 * R + 1)
+	}
+	function explodeAt(cx, cy, cz, R) {
+		const ox = Math.round(cx), oy = Math.round(cy), oz = Math.round(cz), ri = Math.ceil(R)
+		const L = entList(), chain = []
+		let deb = 0
+		for (let dx = -ri; dx <= ri; dx++) for (let dy = -ri; dy <= ri; dy++) for (let dz = -ri; dz <= ri; dz++) {
+			const x = ox + dx, y = oy + dy, z = oz + dz
+			if (y <= 0 || y >= maxHeight - 1) continue
+			const d = Math.hypot(x - cx, y - cy, z - cz)
+			if (d > R) continue
+			if (d > R * 0.55 && Math.random() > (R - d) / (R * 0.45)) continue // nierówna krawędź
+			if (!loadedAt(x, z)) continue
+			const s = world.getBlock(x, y, z)
+			if (!s) continue
+			const id = s & 0xff
+			if (id === blockIds.bedrock || id === blockIds.waterBlock) continue
+			if (isFurnaceId(id)) removeFurnaceAt(x, y, z, survival)
+			if (id === blockIds.tnt) chain.push([x, y, z])
+			else if (deb < 40 && Math.random() < 0.35 && blockData[id] && !blockData[id].noCollide) {
+				deb++
+				const l = Math.max(0.1, d)
+				L.push({ k: "debris", id: id, x: x, y: y, z: z,
+					vx: (x - cx) / l * 0.3 + (Math.random() - 0.5) * 0.15, vy: 0.2 + Math.random() * 0.25, vz: (z - cz) / l * 0.3 + (Math.random() - 0.5) * 0.15,
+					life: 700 + Math.random() * 600 })
+			}
+			world.setBlock(x, y, z, 0)
+		}
+		for (const c of chain) {
+			const a = Math.random() * Math.PI * 2
+			L.push({ k: "tnt", id: blockIds.tnt, x: c[0], y: c[1], z: c[2], vx: Math.sin(a) * 0.02, vy: 0.2, vz: Math.cos(a) * 0.02, fuse: 500 + Math.random() * 1000 })
+		}
+		// gracz
+		if (survival && !p.dead && !p.spectator) {
+			const dx = p.x - cx, dy = (p.y - p.bottomH * 0.5) - cy, dz = p.z - cz
+			const d = Math.max(0.1, Math.hypot(dx, dy, dz))
+			const dmg = explosionDamage(d, R)
+			if (dmg > 0) {
+				hurtPlayer(dmg, "explosion")
+				const imp = 1 - d / (2 * R)
+				if (!p.flying) {
+					p.velocity.x += dx / d * imp * 0.9
+					p.velocity.z += dz / d * imp * 0.9
+					p.velocity.y += Math.min(0.6, 0.2 + dy / d * imp * 0.6)
+				}
+			}
+		}
+		// moby
+		for (const m of world.mobs) {
+			if (m.dying !== undefined) continue
+			const dx = m.x - cx, dy = m.y + m.t.h / 2 - cy, dz = m.z - cz
+			const d = Math.max(0.1, Math.hypot(dx, dy, dz))
+			const dmg = explosionDamage(d, R)
+			if (dmg <= 0) continue
+			const imp = 1 - d / (2 * R)
+			m.hp -= dmg
+			m.hurt = 450
+			m.kx += dx / d * imp * 0.5
+			m.kz += dz / d * imp * 0.5
+			m.vy = Math.max(m.vy, 0.15 + imp * 0.25)
+			m.onGround = false
+			if (m.hp <= 0) { dropMobLoot(m); killMob(m) }
+		}
+	}
+	function tickBlockEnts() {
+		if (!world) return
+		const now = Date.now()
+		let dt = (now - (world.lastEntTick || now)) / 33
+		world.lastEntTick = now
+		dt = dt > 2 ? 2 : dt
+		// kolejka sprawdzeń: czy blok piasku/żwiru traci podparcie
+		const q = world.fallQ
+		if (q && q.length) {
+			world.fallQ = []
+			const n = Math.min(q.length, 900)
+			for (let i = 0; i < n; i += 3) {
+				const x = q[i], y = q[i + 1], z = q[i + 2]
+				if (y <= 1 || !loadedAt(x, z)) continue
+				const s = world.getBlock(x, y, z)
+				if (s && s === (s & 0xff) && isFaller(s) && airish(world.getBlock(x, y - 1, z))) startFall(x, y, z, s)
+			}
+			if (q.length > n) world.fallQ = q.slice(n).concat(world.fallQ)
+		}
+		const L = world.ents
+		if (!L || !L.length) return
+		const order = L.length > 1 ? L.slice().sort((a, b) => a.y - b.y) : L // od najniższego, żeby bloki lądowały w kolejności
+		for (const e of order) {
+			if (e.k === "debris") {
+				e.life -= dt * 33
+				e.vy -= 0.04 * dt
+				e.x += e.vx * dt; e.y += e.vy * dt; e.z += e.vz * dt
+				if (e.life <= 0 || e.y < 1) e.dead = true
+				continue
+			}
+			const bx = Math.round(e.x), bz = Math.round(e.z)
+			if (!loadedAt(bx, bz)) continue
+			if (e.k === "tnt") {
+				e.fuse -= dt * 33
+				if (e.fuse <= 0) { e.dead = true; explodeAt(e.x, e.y, e.z, TNT_R); continue }
+				const nx = e.x + e.vx * dt, nz = e.z + e.vz * dt
+				if (airish(world.getBlock(Math.round(nx), Math.round(e.y), Math.round(e.z)))) e.x = nx; else e.vx = 0
+				if (airish(world.getBlock(Math.round(e.x), Math.round(e.y), Math.round(nz)))) e.z = nz; else e.vz = 0
+			}
+			e.vy = (e.vy - 0.04 * dt) * Math.pow(0.98, dt)
+			const totalY = e.vy * dt, steps = Math.max(1, Math.ceil(Math.abs(totalY) / 0.25)), stepY = totalY / steps
+			for (let st = 0; st < steps; st++) { // podkroki, żeby szybki blok nie przeskoczył przez cienkie podłoże
+				const ny = e.y + stepY
+				const cell = Math.round(ny - 0.5)
+				if (stepY < 0 && !airish(world.getBlock(Math.round(e.x), cell, Math.round(e.z)))) { // podłoże
+					if (e.k === "fall") {
+						e.dead = true
+						const fx = Math.round(e.x), fz = Math.round(e.z), fc = cell + 1
+						if (airish(world.getBlock(fx, fc, fz))) world.setBlock(fx, fc, fz, e.id)
+					} else { // TNT stoi na ziemi
+						e.y = cell + 1
+						e.vy = 0
+						e.vx *= 0.7
+						e.vz *= 0.7
+					}
+					break
+				}
+				e.y = ny
+			}
+			if (e.y < 1) e.dead = true
+		}
+		world.ents = world.ents.filter(e => !e.dead) // nowe encje z wybuchu dopisały się do tej samej tablicy
+	}
+	const entArray = new Float32Array(420 * 144)
+	let entBuffer = null
+	const ENT_TEX = [2, 3, 4, 5, 0, 1] // ściany z MOB_FACES -> indeks tekstury bloku [góra, dół, N, S, E, W]
+	function renderBlockEnts() {
+		const L = world.ents
+		if (!L || !L.length) return
+		const list = L.length > 420 ? L.slice(0, 420) : L
+		const flash = e => e.k === "tnt" && Math.floor(e.fuse / 250) % 2 === 0
+		const ordered = list.filter(e => !flash(e)).concat(list.filter(flash))
+		const normalCount = ordered.findIndex(flash)
+		const arr = entArray
+		let idx = 0, normalEnd = 0
+		for (let ei = 0; ei < ordered.length; ei++) {
+			if (ei === (normalCount < 0 ? ordered.length : normalCount)) normalEnd = idx
+			const e = ordered[ei], d = blockData[e.id]
+			if (!d) continue
+			let sc = 0.998
+			if (e.k === "debris") sc = 0.28
+			else if (e.k === "tnt" && e.fuse < 1000) sc = 1 + 0.1 * Math.sin((1000 - e.fuse) / 60)
+			const tx = d.textures || []
+			for (let f = 0; f < 6; f++) {
+				const name = tx[ENT_TEX[f]] || tx[0] || d.name
+				const tc = textureCoords[textureMap[name]]
+				if (!tc) continue
+				const face6 = MOB_FACES[f]
+				for (let v = 0; v < 4; v++) {
+					const c = face6.c[v]
+					arr[idx++] = e.x + (c[0] - 0.5) * sc
+					arr[idx++] = e.y + (c[1] - 0.5) * sc
+					arr[idx++] = e.z + (c[2] - 0.5) * sc
+					arr[idx++] = tc[v * 2]
+					arr[idx++] = tc[v * 2 + 1]
+					arr[idx++] = face6.s
+				}
+			}
+		}
+		if (normalCount < 0) normalEnd = idx
+		if (!idx) return
+		if (!entBuffer) entBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, entBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, idx), gl.DYNAMIC_DRAW)
+		gl.vertexAttribPointer(glCache.aVertex, 3, gl.FLOAT, false, 24, 0)
+		gl.vertexAttribPointer(glCache.aTexture, 2, gl.FLOAT, false, 24, 12)
+		gl.vertexAttribPointer(glCache.aShadow, 1, gl.FLOAT, false, 24, 20)
+		gl.disable(gl.CULL_FACE)
+		const normalQuads = normalEnd / 24, flashQuads = (idx - normalEnd) / 24
+		if (normalQuads > 0) {
+			gl.uniform1f(glCache.uHurt, 0)
+			gl.drawElements(gl.TRIANGLES, normalQuads * 6, gl.UNSIGNED_INT, 0)
+		}
+		if (flashQuads > 0) {
+			gl.uniform1f(glCache.uHurt, 2) // 2 = biały błysk (shader)
+			gl.drawElements(gl.TRIANGLES, flashQuads * 6, gl.UNSIGNED_INT, normalQuads * 6 * 4)
+			gl.uniform1f(glCache.uHurt, 0)
+		}
+		gl.enable(gl.CULL_FACE)
+	}
+	function mobWaterTop(m) { // wysokość powierzchni wody w kolumnie moba albo null
+		const x = Math.round(m.x), z = Math.round(m.z)
+		const cy = Math.round(m.y + 0.05)
+		let top = null
+		for (let i = 0; i < 4; i++) {
+			const s = world.getBlock(x, cy + i, z)
+			if ((s & 0xff) !== blockIds.waterBlock) break
+			top = cy + i - 0.5 + waterH(s)
+		}
+		return top
+	}
 	function updateMobs() {
 		const now = Date.now()
 		let dt = (now - (world.lastMobTick || now)) / 33
@@ -5037,7 +5310,7 @@ let textures = {
 		if (now > world.nextMobSpawn) {
 			world.nextMobSpawn = now + 2500
 			if (mobs.length < MAX_MOBS && Math.random() < 0.47) trySpawnHerd()
-			if (survival && !p.spectator && !p.dead) trySpawnZombie()
+			if (survival && !p.spectator && !p.dead) { trySpawnZombie(); trySpawnCreeper() }
 		}
 
 		for (let i = mobs.length - 1; i >= 0; i--) {
@@ -5066,7 +5339,8 @@ let textures = {
 			}
 
 			// pływanie: mob w wodzie płynie do najbliższego brzegu
-			const inWater = (world.getBlock(Math.round(m.x), Math.round(m.y + 0.3), Math.round(m.z)) & 0xff) === blockIds.waterBlock
+			const mwt = mobWaterTop(m)
+			const inWater = mwt !== null && m.y < mwt - 0.1
 			if (inWater && now > (m.swimT || 0)) {
 				m.swimT = now + 300
 				const a = findShore(m)
@@ -5075,6 +5349,7 @@ let textures = {
 			if (m.jumpCd > 0) m.jumpCd -= dt * 33
 
 			// obrót
+			if (t.creeper) m.swelling = false
 			// zombie: goni i atakuje gracza tylko w survivalu
 			if (m.t.hostile && m.dying === undefined && survival && !p.dead && !p.spectator && !inWater) {
 				const pdx = p.x - m.x, pdz = p.z - m.z
@@ -5090,7 +5365,13 @@ let textures = {
 						else m.target = st
 					}
 					const pd = Math.sqrt(pd2)
-					if (pd < ZOMBIE_REACH && p.y - p.bottomH < m.y + t.h && p.y + p.topH > m.y && now > (m.atk || 0)) {
+					if (t.creeper && pd < 3 && p.y - p.bottomH < m.y + t.h && p.y + p.topH > m.y - 0.5) { // blisko: staje, puchnie, wybucha
+						m.walking = false
+						m.swelling = true
+						m.fuse = (m.fuse || 0) + dt * 33
+						if (m.fuse >= CREEPER_FUSE) { mobs.splice(i, 1); explodeAt(m.x, m.y + 0.6, m.z, CREEPER_R); continue }
+					}
+					if (!t.creeper && pd < ZOMBIE_REACH && p.y - p.bottomH < m.y + t.h && p.y + p.topH > m.y && now > (m.atk || 0)) {
 						m.atk = now + ZOMBIE_COOLDOWN
 						hurtPlayer(ZOMBIE_DAMAGE, "mob")
 						if (pd > 0.01 && !p.flying) {
@@ -5100,6 +5381,7 @@ let textures = {
 					}
 				}
 			}
+			if (t.creeper && !m.swelling && m.fuse > 0) m.fuse = Math.max(0, m.fuse - dt * 33) // gracz uciekł: lont się cofa
 			let diff = m.target - m.yaw
 			diff = Math.atan2(Math.sin(diff), Math.cos(diff))
 			m.yaw += diff * Math.min(1, 0.15 * dt)
@@ -5146,7 +5428,11 @@ let textures = {
 			// ruch pionowy, w podkrokach co 0.25 bloku, żeby nie przelatywać przez cienkie podłoże
 			const wasGround = m.onGround
 			if (wasGround) m.fallY = m.y
-			if (inWater) m.vy += (0.08 - m.vy) * (m.vy > 0.08 ? 0.05 : 0.2) * dt // wypór bez tłumienia skoku
+			if (inWater) { // wypór: mob unosi się do poziomu wody i lekko buja na powierzchni
+				const tgt = mwt - t.h * 0.38 + Math.sin(now / 350 + m.anim) * 0.04
+				const dv = Math.max(-0.1, Math.min(0.14, (tgt - m.y) * 0.35))
+				m.vy += (dv - m.vy) * Math.min(1, 0.3 * dt)
+			}
 			else m.vy -= MOB_GRAVITY * dt
 			if (m.vy < -1) m.vy = -1
 			m.onGround = false
@@ -5205,11 +5491,13 @@ let textures = {
 		const mobs = world.mobs
 		if (!mobs.length) return
 		const arr = mobArray
-		let idx = 0, normalEnd = 0
-		const ordered = mobs.filter(m => m.hurt <= 0).concat(mobs.filter(m => m.hurt > 0))
-		const normalCount = ordered.findIndex(m => m.hurt > 0)
+		let idx = 0, normalEnd = 0, hurtEnd = 0
+		const grp = m => (m.fuse > 0 && Math.floor(m.fuse / 125) % 2 === 0) ? 2 : (m.hurt > 0 ? 1 : 0)
+		const ordered = mobs.filter(m => grp(m) === 0).concat(mobs.filter(m => grp(m) === 1), mobs.filter(m => grp(m) === 2))
+		const first1 = ordered.findIndex(m => grp(m) >= 1), first2 = ordered.findIndex(m => grp(m) === 2)
 		for (let mi = 0; mi < ordered.length; mi++) {
-			if (mi === (normalCount < 0 ? ordered.length : normalCount)) normalEnd = idx
+			if (mi === first1) normalEnd = idx
+			if (mi === first2) hurtEnd = idx
 			const m = ordered[mi]
 			const sa = Math.sin(m.yaw), ca = Math.cos(m.yaw)
 			let cr = 1, sr = 0, lift = 0, sc = 1
@@ -5222,6 +5510,7 @@ let textures = {
 			}
 			const skin = textureCoords[textureMap[m.t.skin]]
 			const face = textureCoords[textureMap[m.t.face]]
+			const sw = m.fuse > 0 ? 1 + 0.4 * Math.min(1, m.fuse / CREEPER_FUSE) : 1 // creeper puchnie
 			for (const part of m.t.parts) {
 				const dz = part[7] ? Math.sin(m.anim) * 0.12 * part[7] * m.amp : 0
 				const xs = [part[0], part[3]], ys = [part[1], part[4]], zs = [part[2] + dz, part[5] + dz]
@@ -5231,9 +5520,9 @@ let textures = {
 					for (let v = 0; v < 4; v++) {
 						const c = face6.c[v]
 						const ax = xs[c[0]], ay = ys[c[1]]
-						const lx = (ax * cr - ay * sr) * sc
+						const lx = (ax * cr - ay * sr) * sc * sw
 						const ly = (ax * sr + ay * cr + lift) * sc
-						const lz = zs[c[2]] * sc
+						const lz = zs[c[2]] * sc * sw
 						arr[idx++] = m.x + lx * ca + lz * sa
 						arr[idx++] = m.y + ly
 						arr[idx++] = m.z - lx * sa + lz * ca
@@ -5244,7 +5533,8 @@ let textures = {
 				}
 			}
 		}
-		if (normalCount < 0) normalEnd = idx
+		if (first1 < 0) normalEnd = idx
+		if (first2 < 0) hurtEnd = idx
 		if (!mobBuffer) mobBuffer = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, mobBuffer)
 		gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, idx), gl.DYNAMIC_DRAW)
@@ -5253,7 +5543,7 @@ let textures = {
 		gl.vertexAttribPointer(glCache.aShadow, 1, gl.FLOAT, false, 24, 20)
 		gl.disable(gl.CULL_FACE)
 		const normalQuads = normalEnd / 24
-		const hurtQuads = (idx - normalEnd) / 24
+		const hurtQuads = (hurtEnd - normalEnd) / 24, flashQuads = (idx - hurtEnd) / 24
 		if (normalQuads > 0) {
 			gl.uniform1f(glCache.uHurt, 0)
 			gl.drawElements(gl.TRIANGLES, normalQuads * 6, gl.UNSIGNED_INT, 0)
@@ -5261,6 +5551,11 @@ let textures = {
 		if (hurtQuads > 0) {
 			gl.uniform1f(glCache.uHurt, 1)
 			gl.drawElements(gl.TRIANGLES, hurtQuads * 6, gl.UNSIGNED_INT, normalQuads * 6 * 4)
+			gl.uniform1f(glCache.uHurt, 0)
+		}
+		if (flashQuads > 0) {
+			gl.uniform1f(glCache.uHurt, 2) // biały błysk
+			gl.drawElements(gl.TRIANGLES, flashQuads * 6, gl.UNSIGNED_INT, (normalQuads + hurtQuads) * 6 * 4)
 			gl.uniform1f(glCache.uHurt, 0)
 		}
 		gl.enable(gl.CULL_FACE)
@@ -5449,6 +5744,7 @@ let textures = {
 			if (lazy) {
 				return
 			}
+			fallNotify(this, x, y, z)
 
 			//Update the 6 adjacent blocks and 1 changed block
 			if (xm && xm !== 15 && zm && zm !== 15) {
@@ -5834,6 +6130,7 @@ let textures = {
 				chunk.render()
 			}
 			safeMobs(renderMobs)
+			safeMobs(renderBlockEnts)
 			gl.depthMask(false) // woda nie zapisuje głębi
 			for (let i = c.length - 1; i >= 0; i--) {
 				c[i].renderWater() // od najdalszych
@@ -6068,6 +6365,7 @@ let textures = {
 	let defineWorld = function() {
 		animateTextures()
 		safeMobs(updateMobs)
+		safeMobs(tickBlockEnts)
 
 		let tickStart = win.performance.now()
 		world.tick()
@@ -6812,7 +7110,7 @@ let textures = {
 		if (/Ore$/.test(n) || /^(coal|iron|gold|diamond|redstone|lapis|emerald)Block$/.test(n)) return "ores"
 		if (/Wool$|Concrete$|Terracotta$|StainedGlass$/.test(n)) return "color"
 		if (/Planks$|Log$/.test(n)) return "wood"
-		if (/^(bookshelf|glass|ironBars|torch|ladder|trapdoor|oakDoorBottom|craftingTable|furnace|glowstone)$/.test(n)) return "deco"
+		if (/^(bookshelf|glass|ironBars|torch|ladder|trapdoor|oakDoorBottom|craftingTable|furnace|glowstone|tnt)$/.test(n)) return "deco"
 		if (/^(grass|dirt|stone|bedrock|sand|gravel|leaves|justLeaves|grassLeaves|iceBlick|cobwebBlick|netherrack|soulSand|netherWartBlock|waterBlock)$/.test(n)) return "nature"
 		return "build"
 	}
@@ -7064,6 +7362,7 @@ let textures = {
 	}
 	function dropMobLoot(m) { // zabity w survivalu: świnia -> wieprzowina, krowa -> wołowina
 		if (!survival) return
+		if (m.type === "creeper") { for (let n = Math.floor(Math.random() * 3); n > 0; n--) giveItem(blockIds.gunpowder); return } // 0-2 prochu
 		const id = m.type === "pig" ? blockIds.rawPork : m.type === "cow" ? blockIds.rawBeef : 0
 		if (!id) return
 		for (let n = 1 + (Math.random() < 0.5 ? 1 : 0); n > 0; n--) giveItem(id)
@@ -7338,6 +7637,7 @@ let textures = {
 		R.push({ shape: [[id("coal")], [id("stick")]], out: [id("torch"), 4] })                 // węgiel nad patykiem -> 4 pochodnie
 		// rudy żelaza i złota oraz inne wypalanie: w piecu (SMELT_NAMES)
 		if (have("furnace")) R.push({ shape: [[id("cobblestone"), id("cobblestone"), id("cobblestone")], [id("cobblestone"), 0, id("cobblestone")], [id("cobblestone"), id("cobblestone"), id("cobblestone")]], out: [id("furnace"), 1] }) // 8 bruku -> piec
+		if (have("tnt")) { const C = id("gunpowder"), N = id("sand"); R.push({ shape: [[C, N, C], [N, C, N], [C, N, C]], out: [id("tnt"), 1] }) } // 5 prochu + 4 piasku -> TNT
 		// narzędzia (potrzebują siatki 3x3, czyli stołu rzemieślniczego)
 		const S = id("stick")
 		const mats = [["wood", PLANKS], ["stone", [id("cobblestone")]], ["iron", [id("ironIngot")]], ["gold", [id("goldIngot")]], ["diamond", [id("diamond")]]]
@@ -7670,7 +7970,8 @@ let textures = {
 		pigEgg: ["Jajo przywołujące świnię", "Pig Spawn Egg"], cowEgg: ["Jajo przywołujące krowę", "Cow Spawn Egg"], zombieEgg: ["Jajo przywołujące zombie", "Zombie Spawn Egg"],
 		craftingTable: ["Stół do craftingu", "Crafting Table"], stick: ["Patyk", "Stick"], coal: ["Węgiel", "Coal"], ironIngot: ["Sztabka żelaza", "Iron Ingot"],
 		goldIngot: ["Sztabka złota", "Gold Ingot"], diamond: ["Diament", "Diamond"], redstone: ["Czerwony kamień", "Redstone"], lapis: ["Lapis-lazuli", "Lapis Lazuli"],
-		emerald: ["Szmaragd", "Emerald"], netherQuartz: ["Kwarc Netheru", "Nether Quartz"], furnace: ["Piec", "Furnace"], furnaceOn: ["Piec", "Furnace"]
+		emerald: ["Szmaragd", "Emerald"], netherQuartz: ["Kwarc Netheru", "Nether Quartz"], furnace: ["Piec", "Furnace"], furnaceOn: ["Piec", "Furnace"],
+		tnt: ["TNT", "TNT"], gunpowder: ["Proch", "Gunpowder"], creeperEgg: ["Jajo przywołujące creepera", "Creeper Spawn Egg"]
 	}
 	function itemLabel(id) { // czytelna nazwa bloku albo przedmiotu w języku gry
 		const d = blockData[id], n = d && d.name, en = currentLanguage === "English"
