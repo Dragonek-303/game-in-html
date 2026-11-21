@@ -453,6 +453,14 @@ let textures = {
 		lapis: "0g0g5000000004h8ohr08oagov0jjj9xb108ta7z0000000000000000000000000000000000000000000000000000000000000000000001223210000000001443222100000001242222231000000222323322200000132333222221000002222222322000000132222223100000001322233100000000013222100000000000000000000000000000000000000000000000000000",
 		emerald: "0g0g6000000001qwhz302wks1r06l5zpb0us5a7z1z141z30000000000000000000000000000000000000000000000000000000110000000000000144100000000000144431000000000145533310000000144533332100000144433332221000001433332221000000013332221000000000132221000000000001221000000000000011000000000000000000000000000000000000000",
 		netherQuartz: "0g0g5000000012zig3j1fssm4f1tga22n1z141z30000000000000000000000000000000000000001100000000000000440000000000000144100000000000144431000000000044433300000000014433331000000014433332210000000133332210000000003332220000000000132221000000000001221000000000000022000000000000001100000000000000000000000",
+		furnaceTop: "0g0gb08cu4n30ddc7b30g5m8sf0gpo9330k20av30neccn30qqoef30u30g730xfchz310rojr31440lj356556633678547651a6a99a796a6667566989a7a5896698766822222222226711672000000002866447200000000279837920000000027776a620000000026643a72000000002573387200000000296414920000000026755aa200000000276438822222222227a4198866a674665445686788694969a6a75616111147678777",
+		furnaceSide: "0g0g70gpo9330k20av30neccn30qqoef30u30g730xfchz31440lj33140050352632255032652621626652306345362546326633262626345434543333326464454622641314400564446564224522455454254162523431555235554356454411011110563442346466436504544440552323512462226162462235534464502555542124453621531505304643436564363351154300344364544",
+		furnaceFront: "0g0gb04gg2kf06oo3r307ss4cf0flk8hr0gpo9330k20av30neccn30qqoef30u30g730xfchz31440lj37584494796a76699476a96a65a6aa9674a74444444444aa776a4161616164987777416161616466a8574444444444a9a86689668998986985a63333333333799987322222222355549a300000000387a948300000000367956830000000036679973000000003986568333333333349748a8787a9a87a77955987447887a8988",
+		furnaceFrontOn: "0g0gf06oo3r30flk8hr0gpo9330k20av30neccn30qqoef30u30g730xfchz30xw3w1r1440lj31nhc1rz1ywzbwf1yxonb31yys3y71z0cmin536227257495447725497494394997452952222222222995549204040404276555520404040424496352222222222979644674467767647639411111111115777651888dd8881333279188bddb8816597261aabddbaa14573461acccccca14457751aceeeeca1764346111111111127526965659796595573376522566596766",
+		rawPork: "0g0g500000001fp70fz1tmidxb1yy0p331yzz5rz0000000000000000000000000000000000000000000000000000000000000000000011100000000000012321111100000001222223221000000122242222210000122233244223100013222222223210001222222222221000012232222331000000144444444000000001111111000000000000000000000000000000000000",
+		cookedPork: "0g0g600000000jgjfgf0w96z9b1ba5drz1lb5h4v1sl7k730000000000000000000000000000000000000000000000000000000000000000000022200000000000023332222200000001333334442000000211353333320000243111355333200023333111334420002444333111342000023333334112000000255555555000000002222222000000000000000000000000000000000000",
+		rawBeef: "0g0g500000000xvkcfz1cvw9331mcudq71vxmnen0000000000000000000000000000000000000000000000000000000000000000000011100000000000012221111100000001222222221000000132342223210000122223244222100012223323232210001232323222221000013332223221000000144444444000000001111111000000000000000000000000000000000000",
+		steak: "0g0g600000000jgjfgf0nwldrz0zl248v1a5vqin1lcbta70000000000000000000000000000000000000000000000000000000000000000000022200000000000023332222200000001433333332000000211353433420000233111355333200023333111334320002343333111332000023433344112000000255555555000000002222222000000000000000000000000000000000000",
 		woodPickaxe: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000055555500000000011113355000000000000013550000000000004135000000000004203500000000004200150000000004200015000000004200001500000004200000100000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
 		woodAxe: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000005555000000000003333555000000000033331500000000003331100000000000031100000000000004100000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
 		woodShovel: "0g0g600000000ult4hr1064pof18ivym71buzjen1ijt8u70000000000000000000000000005555000000000001355500000000000333330000000000033331000000000001331000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000004200000000000000",
@@ -707,6 +715,14 @@ let textures = {
 	{ name: "diamondSword", special: true, item: true, toolType: "sword", tier: 4 },
 		
 	]
+	blockData.push(
+		{ name: "furnace", textures: ["furnaceTop", "furnaceTop", "furnaceSide", "furnaceFront", "furnaceSide", "furnaceSide"], front: true },
+		{ name: "furnaceOn", textures: ["furnaceTop", "furnaceTop", "furnaceSide", "furnaceFrontOn", "furnaceSide", "furnaceSide"], front: true, hidden: true },
+		{ name: "rawPork", special: true, item: true },
+		{ name: "cookedPork", special: true, item: true },
+		{ name: "rawBeef", special: true, item: true },
+		{ name: "steak", special: true, item: true }
+	)
 	const BLOCK_COUNT = blockData.length;
 
 	
@@ -1999,6 +2015,23 @@ let textures = {
 		blockData[blockIds.torch].shape = shapes.torch
 		blockData[blockIds.fire].shape = shapes.fire
 
+		// Piec: przód (inna tekstura) obraca się razem z graczem. Stan = id | obrót (0x1800); włączony piec to osobny blok furnaceOn.
+		{
+			const FRONT_FACE = [2, 3, 4, 5] // obrót NORTH, SOUTH, EAST, WEST -> numer ściany w textures (dół, góra, północ, południe, wschód, zachód)
+			for (const nm of ["furnace", "furnaceOn"]) {
+				const base = blockData[blockIds[nm]]
+				const T = base.textures, side = T[2], front = T[3]
+				for (let r = 0; r < 4; r++) {
+					const tex = [T[0], T[1], side, side, side, side]
+					tex[FRONT_FACE[r]] = front
+					if (r === 0) { base.textures = tex; continue }
+					const b = Object.create(base)
+					b.textures = tex
+					blockData[base.id | (r << 11)] = b
+				}
+			}
+		}
+
 		// Drzwi: stan = id | obrót (bity 0x1800) | otwarte (bit 0x400)
 		// Otwarcie = dodatkowy obrót o 90°
 		const v = shapes.door.varients     // v[0], v[4], v[2], v[6] = 0°, 90°, 180°, 270°
@@ -3143,6 +3176,7 @@ let textures = {
 
 	function survivalUpdate() {
 		syncInventory()
+		tickFurnaces()
 		if (!survival || p.spectator) { p.survWorld = null; mineReset(); return }
 		if (p.survWorld !== world) { // nowy świat albo przełączenie trybu
 			resetSurvivalState()
@@ -3295,6 +3329,7 @@ let textures = {
 		[/^iceBlick$/, 0.5, "pickaxe", false, 0],
 		[/^(glowstone|netherrack)$/, 0.4, "pickaxe", false, 0],
 		[/^netherWartBlock$/, 1, null, false, 0],
+		[/^furnace(On)?$/, 3.5, "pickaxe", true, 0],
 		[/^(coalOre|netherQuartzOre)$/, 3, "pickaxe", true, 0],
 		[/^(ironOre|lapisOre)$/, 3, "pickaxe", true, 1],
 		[/^(goldOre|diamondOre|redstoneOre|emeraldOre)$/, 3, "pickaxe", true, 2],
@@ -3312,7 +3347,7 @@ let textures = {
 
 	// Co wypada po wykopaniu. Domyślnie: ten sam blok.
 	const NO_DROP = /^(waterBlock|fire|bedrock|glass|blackStainedGlass|iceBlick|cobwebBlick)$|eaves$/
-	const DROP_OVERRIDE = { grass: "dirt", stone: "cobblestone", oakDoorTop: "oakDoorBottom",
+	const DROP_OVERRIDE = { grass: "dirt", stone: "cobblestone", oakDoorTop: "oakDoorBottom", furnaceOn: "furnace",
 		coalOre: "coal", diamondOre: "diamond", emeraldOre: "emerald", lapisOre: "lapis", redstoneOre: "redstone", netherQuartzOre: "netherQuartz" } // rudy dające przedmiot od razu (żelazo i złoto wypadają jako ruda)
 	const DROP_COUNT = { lapisOre: [4, 9], redstoneOre: [4, 5] } // ile sztuk wypada (domyślnie 1)
 	function dropCount(state) {
@@ -3376,6 +3411,8 @@ let textures = {
 			inventory.owner = world
 			inventory.main.fill(0); inventory.mainCounts.fill(0); inventory.craft.fill(0); inventory.craftCounts.fill(0)
 			inventory.holding = 0; inventory.holdCount = 0
+			furnaces.clear(); furnLast = 0
+			if (world.savedFurn) loadFurnaces(world.savedFurn)
 			if (world.savedMain) world.savedMain.forEach((e, i) => { if (i < 16 && e[0] && e[1] > 0) { inventory.main[i] = e[0]; inventory.mainCounts[i] = e[1] } })
 			if (world.savedInv) {
 				h.fill(0)
@@ -3722,6 +3759,7 @@ let textures = {
 			const oy = (old & 0xff) === blockIds.oakDoorBottom ? pos[1] + 1 : pos[1] - 1
 			if (isDoor(world.getBlock(pos[0], oy, pos[2]))) world.setBlock(pos[0], oy, pos[2], 0)
 		}
+		if (!t && pos && isFurnaceId(world.getBlock(pos[0], pos[1], pos[2]) & 0xff)) removeFurnaceAt(pos[0], pos[1], pos[2], survMining) // survival oddaje zawartość
 		if(pos && pos[1] > 0 && pos[1] < maxHeight) {
 			let shape = t && blockData[t].shape
 			if (t && shape.rotate) {
@@ -3810,6 +3848,10 @@ let textures = {
 			const top = face === "bottom" || (face !== "top" && hy < 0.5)
 			world.setBlock(x, y, z, blockIds.trapdoor | rot | (top ? SLAB : 0))
 			p.lastPlace = Date.now()
+			return
+		}
+		if (holding === blockIds.furnace) { // przód pieca zwrócony do gracza
+			if (!inBox(x, y, z, 1, 1, 1)) { world.setBlock(x, y, z, blockIds.furnace | furnaceRot()); p.lastPlace = Date.now() }
 			return
 		}
 		if (!inBox(x, y, z, 1, 1, 1)) {
@@ -5259,7 +5301,7 @@ let textures = {
 		best.hurt = 450 // czerwony przez ok. pół sekundy
 		if (best.onGround) best.vy = 0.17 // lekki podskok
 		p.lastBreak = Date.now()
-		if (best.hp <= 0) killMob(best) // brak dropu
+		if (best.hp <= 0) { dropMobLoot(best); killMob(best) }
 		return true
 	}
 	function killMob(m) { // animacja śmierci zamiast natychmiastowego usunięcia
@@ -5891,7 +5933,7 @@ let textures = {
 
 			let str = world.name + ";" + worldSeed.toString(36) + ";"
 				+ rnd(p.x).toString(36) + "," + rnd(p.y).toString(36) + "," + rnd(p.z).toString(36) + ","
-				+ (p.rx * 100 | 0).toString(36) + "," + (p.ry * 100 | 0).toString(36) + "," + options.toString(36) + "," + invSaveString() + "," + mainSaveString() + ";"
+				+ (p.rx * 100 | 0).toString(36) + "," + (p.ry * 100 | 0).toString(36) + "," + options.toString(36) + "," + invSaveString() + "," + mainSaveString() + "," + furnSaveString() + ";"
 				+ version + ";"
 				+ blocks.map(b => b.toString(36)).join(",") + ";"
 
@@ -5941,6 +5983,7 @@ let textures = {
 			survival = !!(options >> 5 & 1)
 			this.savedInv = null
 			this.savedMain = null
+			this.savedFurn = playerData[8] || null
 			if (playerData[7]) {
 				this.savedMain = playerData[7].split("_").map(s => {
 					const a = s.split("-")
@@ -6769,7 +6812,7 @@ let textures = {
 		if (/Ore$/.test(n) || /^(coal|iron|gold|diamond|redstone|lapis|emerald)Block$/.test(n)) return "ores"
 		if (/Wool$|Concrete$|Terracotta$|StainedGlass$/.test(n)) return "color"
 		if (/Planks$|Log$/.test(n)) return "wood"
-		if (/^(bookshelf|glass|ironBars|torch|ladder|trapdoor|oakDoorBottom|craftingTable|glowstone)$/.test(n)) return "deco"
+		if (/^(bookshelf|glass|ironBars|torch|ladder|trapdoor|oakDoorBottom|craftingTable|furnace|glowstone)$/.test(n)) return "deco"
 		if (/^(grass|dirt|stone|bedrock|sand|gravel|leaves|justLeaves|grassLeaves|iceBlick|cobwebBlick|netherrack|soulSand|netherWartBlock|waterBlock)$/.test(n)) return "nature"
 		return "build"
 	}
@@ -6793,18 +6836,276 @@ let textures = {
 		const total = Math.ceil(invList().length / perRow)
 		return { perRow, rows, maxScroll: Math.max(0, total - rows) }
 	}
+	// ===== PIEC: wypalanie, paliwo, stan i zapis =====
+	const FURNACE_TIME = 10000 // ms na jeden przedmiot
+	const SMELT_NAMES = { ironOre: "ironIngot", goldOre: "goldIngot", cobblestone: "stone", stone: "smoothStone", stoneBricks: "crackedStoneBrick",
+		sand: "glass", sandStone: "smoothSandStone", rawPork: "cookedPork", rawBeef: "steak" } // + każdy pień -> węgiel
+	const FUEL_NAMES = { coal: 80000, coalBlock: 800000, stick: 5000, craftingTable: 15000, bookshelf: 15000, ladder: 5000, oakDoorBottom: 10000, trapdoor: 15000 } // ms palenia; deski i pnie: 15000
+	const FUEL_RULES = [ // [nazwa pasuje do, ms palenia]; 10000 ms = 1 przepalony przedmiot
+		[/(Planks|Log)$/, 15000],                           // wszystkie deski i pnie
+		[/Wool$/, 5000],                                     // wełna (każdy kolor)
+		[/^(leaves|altLeaves|justLeaves|grassLeaves)$/, 2500], // liście
+		[/^grass$/, 2500],                                   // trawa
+		[/^wood(Pickaxe|Axe|Shovel|Sword)$/, 10000],         // drewniane narzędzia
+		[/^oakDoor/, 10000]                                  // drzwi
+	]
+	const FOOD_HP = { rawPork: 3, cookedPork: 8, rawBeef: 3, steak: 8 } // ile życia przywraca (20 = pełne życie)
+	const FOOD_LABEL = { rawPork: ["Surowa wieprzowina", "Raw porkchop"], cookedPork: ["Upieczona wieprzowina", "Cooked porkchop"],
+		rawBeef: ["Surowa wołowina", "Raw beef"], steak: ["Stek", "Steak"] }
+	let smeltCache = null, fuelCache = null
+	function smeltTable() { // id wsadu -> id wyniku
+		if (smeltCache) return smeltCache
+		smeltCache = {}
+		for (const k in SMELT_NAMES) if (blockIds[k] !== undefined && blockIds[SMELT_NAMES[k]] !== undefined) smeltCache[blockIds[k]] = blockIds[SMELT_NAMES[k]]
+		for (let i = 1; i < BLOCK_COUNT; i++) if (/Log$/.test(blockData[i].name) && blockIds.coal !== undefined) smeltCache[i] = blockIds.coal
+		return smeltCache
+	}
+	function fuelTime(id) { // ms palenia jednej sztuki paliwa (0 = to nie paliwo)
+		if (!fuelCache) {
+			fuelCache = {}
+			for (const k in FUEL_NAMES) if (blockIds[k] !== undefined) fuelCache[blockIds[k]] = FUEL_NAMES[k]
+			for (let i = 1; i < BLOCK_COUNT; i++) { // reguły po nazwie: całe drewno, wełna, liście, trawa, drewniane narzędzia, drzwi
+				const n = blockData[i].name
+				for (const r of FUEL_RULES) if (r[0].test(n)) { fuelCache[i] = r[1]; break }
+			}
+		}
+		return fuelCache[id] || 0
+	}
+	function foodValue(id) { const d = id && blockData[id]; return d && FOOD_HP[d.name] || 0 }
+	const furnaces = new Map() // "x,y,z" -> stan pieca
+	let invFurnace = null      // klucz pieca otwartego na ekranie
+	let furnLast = 0, furnDraw = 0
+	function furnaceKey(x, y, z) { return x + "," + y + "," + z }
+	function getFurnace(x, y, z) {
+		const k = furnaceKey(x, y, z)
+		let f = furnaces.get(k)
+		if (!f) {
+			f = { x: x, y: y, z: z, inId: 0, inN: 0, fuId: 0, fuN: 0, outId: 0, outN: 0, burn: 0, burnMax: 0, cook: 0, cookFor: 0, lit: false, chk: 0 }
+			furnaces.set(k, f)
+		}
+		return f
+	}
+	function curFurnace() { return invFurnace ? furnaces.get(invFurnace) || null : null }
+	function isFurnaceId(id) { return id === blockIds.furnace || id === blockIds.furnaceOn }
+	function setFurnaceBlock(f) { // podmienia blok na włączony / wyłączony, zachowując obrót
+		if (!world) return
+		const s = world.getBlock(f.x, f.y, f.z), id = s & 0xff
+		if (!isFurnaceId(id)) return
+		const want = f.lit ? blockIds.furnaceOn : blockIds.furnace
+		if (id !== want) world.setBlock(f.x, f.y, f.z, want | (s & ROTATION))
+	}
+	function stepFurnace(f, dt) {
+		if (f.cookFor !== f.inId) { f.cookFor = f.inId; f.cook = 0 } // zmiana wsadu zeruje postęp
+		const res = f.inId ? smeltTable()[f.inId] : 0
+		const can = !!res && (!f.outId || (f.outId === res && f.outN < MAX_STACK))
+		if (f.burn <= 0 && can && f.fuId && fuelTime(f.fuId) > 0) { // zapal kolejną sztukę paliwa
+			f.burn = f.burnMax = fuelTime(f.fuId)
+			if (isTool(f.fuId) || --f.fuN <= 0) { f.fuId = 0; f.fuN = 0 } // narzędzie spala się w całości (jego licznik to wytrzymałość, nie ilość)
+		}
+		if (f.burn > 0) {
+			f.burn = Math.max(0, f.burn - dt)
+			if (can) {
+				f.cook += dt
+				if (f.cook >= FURNACE_TIME) {
+					f.cook -= FURNACE_TIME
+					f.outId = res
+					f.outN++
+					if (--f.inN <= 0) { f.inId = 0; f.inN = 0 }
+				}
+			} else f.cook = Math.max(0, f.cook - dt * 2)
+		} else if (f.cook > 0) f.cook = Math.max(0, f.cook - dt * 2)
+		const lit = f.burn > 0
+		if (lit !== f.lit) { f.lit = lit; setFurnaceBlock(f) }
+	}
+	function tickFurnaces() { // co klatkę; piece działają też z zamkniętym ekranem
+		const now = Date.now()
+		let dt = furnLast ? now - furnLast : 0
+		furnLast = now
+		if (dt > 1000) dt = 1000
+		if (dt <= 0 || !furnaces.size || !world) return
+		for (const f of furnaces.values()) {
+			stepFurnace(f, dt)
+			if (now - f.chk > 1500) { f.chk = now; setFurnaceBlock(f) } // po doczytaniu chunku wygląd musi się zgadzać
+		}
+	}
+	function removeFurnaceAt(x, y, z, spill) { // blok zniszczony: usuń stan, w survivalu oddaj zawartość
+		const k = furnaceKey(x, y, z), f = furnaces.get(k)
+		if (!f) return
+		furnaces.delete(k)
+		if (!spill) return
+		for (const e of [[f.inId, f.inN], [f.fuId, f.fuN], [f.outId, f.outN]]) {
+			for (let n = e[1]; e[0] && n > 0; n--) giveItem(e[0])
+		}
+	}
+	function furnaceRot() { // przód pieca zwrócony do gracza
+		const pi = Math.PI / 4, a = ((p.ry % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
+		// ściany w silniku: NORTH = +z, SOUTH = -z, EAST = +x, WEST = -x; przód ma być po stronie gracza (stoi w kierunku (sin ry, -cos ry) od pieca)
+		if (a > pi && a < 3 * pi) return EAST    // gracz po stronie +x
+		if (a >= 3 * pi && a < 5 * pi) return NORTH  // gracz po stronie +z
+		if (a >= 5 * pi && a < 7 * pi) return WEST   // gracz po stronie -x
+		return SOUTH                                   // gracz po stronie -z
+	}
+	function openFurnace(x, y, z) {
+		getFurnace(x, y, z)
+		invFurnace = furnaceKey(x, y, z)
+		invTable = false
+		changeScene("inventory")
+		releasePointer()
+	}
+	function furnSaveString() { // piece oddzielone _, pola :, liczby w base36 (czasy w setnych sekundy)
+		const out = []
+		for (const f of furnaces.values()) {
+			if (!f.inN && !f.fuN && !f.outN && f.burn <= 0) continue
+			out.push([f.x, f.y, f.z, f.inId, f.inN, f.fuId, f.fuN, f.outId, f.outN, Math.round(f.burn / 100), Math.round(f.burnMax / 100), Math.round(f.cook / 100)]
+				.map(n => n.toString(36)).join(":"))
+		}
+		return out.join("_")
+	}
+	function loadFurnaces(str) {
+		for (const s of String(str).split("_")) {
+			const a = s.split(":").map(t => parseInt(t, 36))
+			if (a.length < 12 || a.some(isNaN)) continue
+			const f = getFurnace(a[0], a[1], a[2])
+			f.inId = a[3]; f.inN = a[4]; f.fuId = a[5]; f.fuN = a[6]; f.outId = a[7]; f.outN = a[8]
+			f.burn = a[9] * 100; f.burnMax = a[10] * 100; f.cook = a[11] * 100
+		}
+	}
+	function clickFurnaceSlot(k, button, shift) {
+		const f = curFurnace()
+		if (!f) return
+		if (k === "fout") { // wynik: tylko do wzięcia
+			if (!f.outId) return
+			if (shift) {
+				f.outN = transfer(f.outId, f.outN, ["main", "hot"])
+				if (f.outN <= 0) { f.outId = 0; f.outN = 0 }
+				return
+			}
+			const hid = inventory.holding, hn = inventory.holdCount || 1
+			if (hid && hid !== f.outId) return
+			const have = hid ? hn : 0, take = Math.min(f.outN, MAX_STACK - have)
+			if (take <= 0) return
+			inventory.holding = f.outId
+			inventory.holdCount = have + take
+			f.outN -= take
+			if (f.outN <= 0) { f.outId = 0; f.outN = 0 }
+			return
+		}
+		const hid = inventory.holding
+		if (hid && !(k === "fin" ? smeltTable()[hid] : fuelTime(hid) > 0)) return // wsad: tylko to, co się wypala; paliwo: tylko paliwo
+		clickSlot(k, 0, button, shift)
+	}
+	function furnaceQuickIn(k, i) { // Shift + klik na przedmiocie w ekwipunku, gdy piec jest otwarty; true = przeniesiono
+		const f = curFurnace(), sl = slotGet(k, i), id = sl[0]
+		if (!f || !id) return false
+		const slot = smeltTable()[id] ? "fin" : fuelTime(id) > 0 ? "ffuel" : null
+		if (!slot) return false
+		const cur = slotGet(slot, 0)
+		if (cur[0] && cur[0] !== id) return false
+		const add = Math.min(MAX_STACK - (cur[0] ? cur[1] : 0), sl[1])
+		if (add <= 0) return false
+		slotSet(slot, 0, id, (cur[0] ? cur[1] : 0) + add)
+		slotSet(k, i, id, sl[1] - add)
+		return true
+	}
+	function drawFurnaceExtras(g, f) { // płomień i strzałka postępu
+		const s = g.s, fx = g.cx + s * 0.18, fy = g.cy + s * 1.12, fw = s * 0.64, fh = s * 0.76
+		const flame = (x, y, w, h) => {
+			ctx.beginPath()
+			ctx.moveTo(x + w * 0.5, y)
+			ctx.bezierCurveTo(x + w * 0.95, y + h * 0.35, x + w * 1.0, y + h * 0.8, x + w * 0.5, y + h)
+			ctx.bezierCurveTo(x, y + h * 0.8, x + w * 0.05, y + h * 0.35, x + w * 0.5, y)
+			ctx.closePath()
+		}
+		ctx.fillStyle = "#4a4a4a"
+		flame(fx, fy, fw, fh)
+		ctx.fill()
+		if (f.burn > 0 && f.burnMax > 0) {
+			const k = Math.min(1, f.burn / f.burnMax)
+			ctx.save()
+			flame(fx, fy, fw, fh)
+			ctx.clip()
+			ctx.fillStyle = "#ff8c1a"
+			ctx.fillRect(fx, fy + fh * (1 - k), fw, fh * k)
+			ctx.fillStyle = "#ffd24a"
+			ctx.fillRect(fx, fy + fh * (1 - k * 0.5), fw, fh * k * 0.5)
+			ctx.restore()
+		}
+		const ax = g.cx + s * 1.2, ay = g.cy + s * 1.5, aw = s * 1.55
+		const arrow = (w) => {
+			ctx.beginPath()
+			ctx.rect(ax, ay - s * 0.07, Math.min(w, aw * 0.65), s * 0.14)
+			if (w > aw * 0.65) { ctx.moveTo(ax + aw * 0.65, ay - s * 0.2); ctx.lineTo(ax + w, ay); ctx.lineTo(ax + aw * 0.65, ay + s * 0.2) }
+			ctx.closePath()
+			ctx.fill()
+		}
+		ctx.fillStyle = "#555"
+		arrow(aw)
+		if (f.cook > 0) {
+			ctx.save()
+			ctx.beginPath()
+			ctx.rect(ax, ay - s * 0.3, aw * Math.min(1, f.cook / FURNACE_TIME), s * 0.6)
+			ctx.clip()
+			ctx.fillStyle = "#ffffff"
+			arrow(aw)
+			ctx.restore()
+		}
+	}
+	function tryEat() { // prawy przycisk z jedzeniem w ręce; true = to było jedzenie (nie stawiamy)
+		if (!survival || p.dead) return false
+		const slot = inventory.hotbarSlot, id = inventory.hotbar[slot], hp = foodValue(id)
+		if (!hp) return false
+		const now = Date.now()
+		if (p.health >= MAX_HEALTH || now - (p.lastEat || 0) < 500) return true
+		p.lastEat = now
+		p.health = Math.min(MAX_HEALTH, p.health + hp) // jak w pierwszych wersjach: życie wraca od razu
+		consumeItem(slot)
+		updateHUD = true
+		return true
+	}
+	function dropMobLoot(m) { // zabity w survivalu: świnia -> wieprzowina, krowa -> wołowina
+		if (!survival) return
+		const id = m.type === "pig" ? blockIds.rawPork : m.type === "cow" ? blockIds.rawBeef : 0
+		if (!id) return
+		for (let n = 1 + (Math.random() < 0.5 ? 1 : 0); n > 0; n--) giveItem(id)
+	}
+	function drawFoodTip(id) {
+		const en = currentLanguage === "English", d = blockData[id], lab = FOOD_LABEL[d.name]
+		const lines = [lab[en ? 1 : 0], (en ? "Restores " : "Przywraca ") + FOOD_HP[d.name] + " HP"]
+		ctx.font = "14px Poppins"
+		ctx.textAlign = "left"
+		let w = 0
+		for (const l of lines) w = Math.max(w, ctx.measureText(l).width)
+		const pad = 9, lh = 19, bw = w + pad * 2, bh = lines.length * lh + pad * 2 - 6
+		let x = mouseX + 16, y = mouseY - 8
+		if (x + bw > width - 2) x = mouseX - bw - 10
+		if (y + bh > height - 2) y = height - bh - 2
+		if (y < 2) y = 2
+		ctx.fillStyle = "rgba(16, 0, 16, 0.93)"
+		ctx.fillRect(x, y, bw, bh)
+		ctx.lineWidth = 2
+		ctx.strokeStyle = "rgb(70, 24, 130)"
+		ctx.strokeRect(x + 1, y + 1, bw - 2, bh - 2)
+		const colors = ["#ffffff", "#ff8a8a"]
+		lines.forEach((l, i) => {
+			ctx.fillStyle = colors[i]
+			ctx.fillText(l, x + pad, y + pad + 11 + i * lh)
+		})
+		textSize(10)
+		fill(255, 255, 255)
+	}
+
 	// ===== EKWIPUNEK: ZAKŁADKI, SLOTY, CRAFTING 2x2 / STÓŁ 3x3 =====
 	let invTab = "all" // tylko kreatywny: id kategorii (all, build, nature, ...) albo "bag" = ekwipunek
 	let invTable = false  // true, gdy ekran otwarto prawym kliknięciem w stół rzemieślniczy (siatka 3x3)
 	function craftDim() { return invTable ? 3 : 2 }
-	function invMode() { return survival || invTable ? "bag" : (invTab === "bag" ? "bag" : "blocks") }
+	function invMode() { return survival || invTable || invFurnace ? "bag" : (invTab === "bag" ? "bag" : "blocks") }
 	function openTable() {
 		invTable = true
 		changeScene("inventory")
 		releasePointer()
 	}
 	function invTopOff() { // o ile siatka bloków jest przesunięta w dół, żeby zmieścić rząd zakładek (tylko kreatywny)
-		if (survival || invTable) return 0
+		if (survival || invTable || invFurnace) return 0
 		const s = inventory.size, th = Math.round(s * 0.95)
 		return Math.max(0, th + 8 - 50 + Math.round(s / 2))
 	}
@@ -6892,8 +7193,14 @@ let textures = {
 		const g = bagGeom(), s = g.s, d = g.d, out = []
 		for (let i = 0; i < 16; i++) out.push({ k: "main", i: i, x: g.gx + (i % 4) * s, y: g.gy + (i >> 2) * s })
 		for (let i = 0; i < 9; i++) out.push({ k: "hot", i: i, x: g.hx + i * s, y: g.hy })
-		for (let r = 0; r < d; r++) for (let c = 0; c < d; c++) out.push({ k: "craft", i: r * 3 + c, x: g.cx + c * s, y: g.cy + r * s })
-		out.push({ k: "out", i: 0, x: g.cx + (d + 1) * s, y: g.cy + (d * s - s) / 2 })
+		if (curFurnace()) { // piec: wsad, paliwo i wynik zamiast siatki craftingu
+			out.push({ k: "fin", i: 0, x: g.cx, y: g.cy })
+			out.push({ k: "ffuel", i: 0, x: g.cx, y: g.cy + 2 * s })
+			out.push({ k: "fout", i: 0, x: g.cx + 3 * s, y: g.cy + s })
+		} else {
+			for (let r = 0; r < d; r++) for (let c = 0; c < d; c++) out.push({ k: "craft", i: r * 3 + c, x: g.cx + c * s, y: g.cy + r * s })
+			out.push({ k: "out", i: 0, x: g.cx + (d + 1) * s, y: g.cy + (d * s - s) / 2 })
+		}
 		return out
 	}
 	function bagSlotAt(mx, my) {
@@ -6904,12 +7211,22 @@ let textures = {
 	function slotGet(k, i) {
 		if (k === "hot") return [inventory.hotbar[i], inventory.counts[i]]
 		if (k === "main") return [inventory.main[i], inventory.mainCounts[i]]
+		if (k === "fin" || k === "ffuel" || k === "fout") {
+			const f = curFurnace()
+			if (!f) return [0, 0]
+			return k === "fin" ? [f.inId, f.inN] : k === "ffuel" ? [f.fuId, f.fuN] : [f.outId, f.outN]
+		}
 		return [inventory.craft[i], inventory.craftCounts[i]]
 	}
 	function slotSet(k, i, id, n) {
 		if (!id || n <= 0) { id = 0; n = 0 }
 		if (k === "hot") { inventory.hotbar[i] = id; inventory.counts[i] = n }
 		else if (k === "main") { inventory.main[i] = id; inventory.mainCounts[i] = n }
+		else if (k === "fin" || k === "ffuel" || k === "fout") {
+			const f = curFurnace()
+			if (!f) return
+			if (k === "fin") { f.inId = id; f.inN = n } else if (k === "ffuel") { f.fuId = id; f.fuN = n } else { f.outId = id; f.outN = n }
+		}
 		else { inventory.craft[i] = id; inventory.craftCounts[i] = n }
 	}
 	function transfer(id, n, order) { // wkłada n sztuk do podanych grup slotów; zwraca, ile nie weszło
@@ -6951,6 +7268,7 @@ let textures = {
 	function quickMove(k, i) { // Shift + klik: pasek <-> ekwipunek, crafting -> ekwipunek
 		const sl = slotGet(k, i)
 		if (!sl[0]) return
+		if ((k === "hot" || k === "main") && curFurnace() && furnaceQuickIn(k, i)) return
 		const order = k === "hot" ? ["main"] : k === "main" ? ["hot"] : ["main", "hot"]
 		slotSet(k, i, sl[0], transfer(sl[0], sl[1], order))
 	}
@@ -7018,9 +7336,8 @@ let textures = {
 		R.push({ shape: [[PLANKS, PLANKS], [PLANKS, PLANKS]], out: [id("craftingTable"), 1] }) // 4 deski -> stół
 		R.push({ shape: [[PLANKS], [PLANKS]], out: [id("stick"), 4] })                          // 2 deski -> 4 patyki
 		R.push({ shape: [[id("coal")], [id("stick")]], out: [id("torch"), 4] })                 // węgiel nad patykiem -> 4 pochodnie
-		// tylko rudy, z których przedmiot nie wypada od razu (nie ma jeszcze pieca): żelazo i złoto
-		const ores = [["ironOre", "ironIngot", 1], ["goldOre", "goldIngot", 1]]
-		for (const o of ores) if (have(o[0])) R.push({ shape: [[id(o[0])]], out: [id(o[1]), o[2]] }) // ruda -> przedmiot
+		// rudy żelaza i złota oraz inne wypalanie: w piecu (SMELT_NAMES)
+		if (have("furnace")) R.push({ shape: [[id("cobblestone"), id("cobblestone"), id("cobblestone")], [id("cobblestone"), 0, id("cobblestone")], [id("cobblestone"), id("cobblestone"), id("cobblestone")]], out: [id("furnace"), 1] }) // 8 bruku -> piec
 		// narzędzia (potrzebują siatki 3x3, czyli stołu rzemieślniczego)
 		const S = id("stick")
 		const mats = [["wood", PLANKS], ["stone", [id("cobblestone")]], ["iron", [id("ironIngot")]], ["gold", [id("goldIngot")]], ["diamond", [id("diamond")]]]
@@ -7045,11 +7362,8 @@ let textures = {
 			shaped(grid3(B(pr[0])), pr[1], 1)
 			shaped([[B(pr[1])]], pr[0], 9)
 		}
-		// kamień (jeden przedmiot w siatce = wypalanie, bo nie ma jeszcze pieca)
-		shaped([[B("cobblestone")]], "stone")
-		shaped([[B("stone")]], "smoothStone")
+		// kamień
 		shaped(grid2(B("stone")), "stoneBricks", 4)
-		shaped([[B("stoneBricks")]], "crackedStoneBrick")
 		shaped([[B("stoneBricks"), B("stoneBricks")]], "chiseledStoneBricks")
 		less([B("cobblestone"), LEAVES], "mossyCobble")
 		less([B("stoneBricks"), LEAVES], "mossyStoneBricks")
@@ -7059,9 +7373,7 @@ let textures = {
 		for (const n of ["Andesite", "Diorite", "Granite"]) shaped(grid2(B(n.toLowerCase())), "polished" + n, 4)
 		// piaskowiec, szkło, kwarc
 		shaped(grid2(B("sand")), "sandStone")
-		shaped([[B("sandStone")]], "smoothSandStone")
 		shaped([[B("sandStone"), B("sandStone")]], "chiseledSandStone")
-		shaped([[B("sand")]], "glass")
 		shaped(grid2(B("netherQuartz")), "quartzBlock")
 		shaped([[B("quartzBlock")], [B("quartzBlock")]], "quartzPillar", 2)
 		shaped([[B("quartzBlock"), B("quartzBlock")]], "chiseledQuartzBlock")
@@ -7177,6 +7489,7 @@ let textures = {
 		const sl = bagSlotAt(mouseX, mouseY)
 		if (sl) {
 			if (sl.k === "out") clickOut(button, shift)
+			else if (sl.k === "fin" || sl.k === "ffuel" || sl.k === "fout") clickFurnaceSlot(sl.k, button, shift)
 			else clickSlot(sl.k, sl.i, button, shift)
 		} else if (!survival) { // kreatywny: kliknięcie poza slotami wyrzuca trzymany przedmiot
 			inventory.holding = 0
@@ -7187,7 +7500,7 @@ let textures = {
 		drawScreens.inventory()
 	}
 	function drawBag() {
-		const g = bagGeom(), s = g.s, slots = bagSlots(), res = craftResult()
+		const g = bagGeom(), s = g.s, slots = bagSlots(), fz = curFurnace(), res = fz ? null : craftResult()
 		gl.clearColor(0, 0, 0, 0)
 		gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		ctx.fillStyle = "rgb(127, 127, 127)"
@@ -7206,16 +7519,18 @@ let textures = {
 			ctx.strokeStyle = "white"
 			ctx.strokeRect(hov.x, hov.y, s, s)
 		}
-		// strzałka crafting -> wynik
-		const ax = g.cx + g.d * s + s * 0.1, my = g.cy + g.d * s / 2
-		ctx.fillStyle = "#555"
-		ctx.fillRect(ax, my - s * 0.07, s * 0.5, s * 0.14)
-		ctx.beginPath()
-		ctx.moveTo(ax + s * 0.5, my - s * 0.2)
-		ctx.lineTo(ax + s * 0.78, my)
-		ctx.lineTo(ax + s * 0.5, my + s * 0.2)
-		ctx.closePath()
-		ctx.fill()
+		if (fz) drawFurnaceExtras(g, fz)
+		else { // strzałka crafting -> wynik
+			const ax = g.cx + g.d * s + s * 0.1, my = g.cy + g.d * s / 2
+			ctx.fillStyle = "#555"
+			ctx.fillRect(ax, my - s * 0.07, s * 0.5, s * 0.14)
+			ctx.beginPath()
+			ctx.moveTo(ax + s * 0.5, my - s * 0.2)
+			ctx.lineTo(ax + s * 0.78, my)
+			ctx.lineTo(ax + s * 0.5, my + s * 0.2)
+			ctx.closePath()
+			ctx.fill()
+		}
 		// ikony (pasek rysuje hotbar())
 		if (inventory.holding) drawIcon(mouseX, mouseY, inventory.holding)
 		for (const sl of slots) {
@@ -7251,11 +7566,12 @@ let textures = {
 		ctx.textAlign = "left"
 		ctx.fillStyle = "#222"
 		ctx.fillText(en ? "Inventory" : "Ekwipunek", g.gx, g.gy - 6)
-		ctx.fillText(invTable ? (en ? "Crafting Table" : "Stół rzemieślniczy") : (en ? "Crafting" : "Wytwarzanie"), g.cx, g.cy - 6)
+		ctx.fillText(fz ? (en ? "Furnace" : "Piec") : invTable ? (en ? "Crafting Table" : "Stół rzemieślniczy") : (en ? "Crafting" : "Wytwarzanie"), g.cx, g.cy - 6)
 		drawCounts()
-		if (!survival && !invTable) drawInvTabs()
+		if (!survival && !invTable && !invFurnace) drawInvTabs()
 	}
 	function returnInvItems() { // przy zamknięciu ekwipunku siatka craftingu i kursor wracają do ekwipunku
+		invFurnace = null
 		if (!inventory.craft) return
 		let moved = false
 		for (let i = 0; i < 9; i++) {
@@ -7315,10 +7631,86 @@ let textures = {
 		}
 		return null
 	}
+	// ===== NAZWY PRZEDMIOTÓW W PODPOWIEDZI =====
+	const NAME_COLORS = { // [wełna PL, beton PL, EN]
+		white: ["biała", "Biały", "White"], orange: ["pomarańczowa", "Pomarańczowy", "Orange"], magenta: ["magenta", "Magenta", "Magenta"],
+		lightBlue: ["jasnoniebieska", "Jasnoniebieski", "Light Blue"], yellow: ["żółta", "Żółty", "Yellow"], lime: ["limonkowa", "Limonkowy", "Lime"],
+		pink: ["różowa", "Różowy", "Pink"], gray: ["szara", "Szary", "Gray"], lightGray: ["jasnoszara", "Jasnoszary", "Light Gray"],
+		cyan: ["cyjanowa", "Cyjanowy", "Cyan"], purple: ["fioletowa", "Fioletowy", "Purple"], blue: ["niebieska", "Niebieski", "Blue"],
+		brown: ["brązowa", "Brązowy", "Brown"], green: ["zielona", "Zielony", "Green"], red: ["czerwona", "Czerwony", "Red"], black: ["czarna", "Czarny", "Black"]
+	}
+	const NAME_WOODS = { // [deski PL, pień PL, EN]
+		oak: ["dębowe", "dębu", "Oak"], acacia: ["akacjowe", "akacji", "Acacia"], birch: ["brzozowe", "brzozy", "Birch"],
+		darkOak: ["z ciemnego dębu", "ciemnego dębu", "Dark Oak"], jungle: ["dżunglowe", "drzewa dżunglowego", "Jungle"], spruce: ["świerkowe", "świerku", "Spruce"]
+	}
+	const ITEM_NAMES = { // nazwa w kodzie: [polski, angielski]
+		grass: ["Blok trawy", "Grass Block"], dirt: ["Ziemia", "Dirt"], stone: ["Kamień", "Stone"], bedrock: ["Skała macierzysta", "Bedrock"],
+		sand: ["Piasek", "Sand"], gravel: ["Żwir", "Gravel"], leaves: ["Liście", "Leaves"], altLeaves: ["Liście (jesienne)", "Autumn Leaves"],
+		justLeaves: ["Liście (jasne)", "Light Leaves"], grassLeaves: ["Liście (trawiaste)", "Grassy Leaves"], glass: ["Szkło", "Glass"],
+		cobblestone: ["Bruk", "Cobblestone"], mossyCobble: ["Zamszony bruk", "Mossy Cobblestone"], stoneBricks: ["Kamienne cegły", "Stone Bricks"],
+		mossyStoneBricks: ["Zamszone kamienne cegły", "Mossy Stone Bricks"], crackedStoneBrick: ["Popękane kamienne cegły", "Cracked Stone Bricks"],
+		chiseledStoneBricks: ["Rzeźbione kamienne cegły", "Chiseled Stone Bricks"], bricks: ["Cegły", "Bricks"],
+		coalOre: ["Ruda węgla", "Coal Ore"], ironOre: ["Ruda żelaza", "Iron Ore"], goldOre: ["Ruda złota", "Gold Ore"], diamondOre: ["Ruda diamentu", "Diamond Ore"],
+		redstoneOre: ["Ruda czerwonego kamienia", "Redstone Ore"], lapisOre: ["Ruda lapis-lazuli", "Lapis Lazuli Ore"], emeraldOre: ["Ruda szmaragdu", "Emerald Ore"],
+		netherQuartzOre: ["Ruda kwarcu", "Nether Quartz Ore"], coalBlock: ["Blok węgla", "Block of Coal"], ironBlock: ["Blok żelaza", "Block of Iron"],
+		goldBlock: ["Blok złota", "Block of Gold"], diamondBlock: ["Blok diamentu", "Block of Diamond"], redstoneBlock: ["Blok czerwonego kamienia", "Block of Redstone"],
+		lapisBlock: ["Blok lapis-lazuli", "Block of Lapis Lazuli"], emeraldBlock: ["Blok szmaragdu", "Block of Emerald"],
+		bookshelf: ["Regał z książkami", "Bookshelf"], netherrack: ["Netherrack", "Netherrack"], soulSand: ["Piasek dusz", "Soul Sand"],
+		glowstone: ["Jasnogłaz", "Glowstone"], netherWartBlock: ["Blok brodawki Netheru", "Nether Wart Block"], netherBricks: ["Cegły Netheru", "Nether Bricks"],
+		redNetherBricks: ["Czerwone cegły Netheru", "Red Nether Bricks"], quartzBlock: ["Blok kwarcu", "Block of Quartz"], quartzPillar: ["Filar kwarcu", "Quartz Pillar"],
+		chiseledQuartzBlock: ["Rzeźbiony blok kwarcu", "Chiseled Quartz Block"], smoothStone: ["Gładki kamień", "Smooth Stone"],
+		andesite: ["Andezyt", "Andesite"], polishedAndesite: ["Polerowany andezyt", "Polished Andesite"], diorite: ["Dioryt", "Diorite"],
+		polishedDiorite: ["Polerowany dioryt", "Polished Diorite"], granite: ["Granit", "Granite"], polishedGranite: ["Polerowany granit", "Polished Granite"],
+		sandStone: ["Piaskowiec", "Sandstone"], smoothSandStone: ["Gładki piaskowiec", "Smooth Sandstone"], chiseledSandStone: ["Rzeźbiony piaskowiec", "Chiseled Sandstone"],
+		ironBars: ["Żelazne kraty", "Iron Bars"], waterBlock: ["Woda", "Water"], iceBlick: ["Lód", "Ice"], cobwebBlick: ["Pajęczyna", "Cobweb"],
+		dispenserBlick: ["Dozownik", "Dispenser"], blackStainedGlass: ["Czarne szkło witrażowe", "Black Stained Glass"], whiteTerracotta: ["Biała terakota", "White Terracotta"],
+		sidewaysPillar: ["Filar", "Pillar"], torch: ["Pochodnia", "Torch"], fire: ["Ogień", "Fire"], lighter: ["Zapalniczka", "Flint and Steel"],
+		oakDoorBottom: ["Drzwi dębowe", "Oak Door"], oakDoorTop: ["Drzwi dębowe", "Oak Door"], oakDoorTip: ["Drzwi dębowe", "Oak Door"],
+		oakDoorBittim: ["Drzwi dębowe", "Oak Door"], oakDoorBittimboi: ["Drzwi dębowe", "Oak Door"], ladder: ["Drabina", "Ladder"], trapdoor: ["Klapa", "Trapdoor"],
+		pigEgg: ["Jajo przywołujące świnię", "Pig Spawn Egg"], cowEgg: ["Jajo przywołujące krowę", "Cow Spawn Egg"], zombieEgg: ["Jajo przywołujące zombie", "Zombie Spawn Egg"],
+		craftingTable: ["Stół do craftingu", "Crafting Table"], stick: ["Patyk", "Stick"], coal: ["Węgiel", "Coal"], ironIngot: ["Sztabka żelaza", "Iron Ingot"],
+		goldIngot: ["Sztabka złota", "Gold Ingot"], diamond: ["Diament", "Diamond"], redstone: ["Czerwony kamień", "Redstone"], lapis: ["Lapis-lazuli", "Lapis Lazuli"],
+		emerald: ["Szmaragd", "Emerald"], netherQuartz: ["Kwarc Netheru", "Nether Quartz"], furnace: ["Piec", "Furnace"], furnaceOn: ["Piec", "Furnace"]
+	}
+	function itemLabel(id) { // czytelna nazwa bloku albo przedmiotu w języku gry
+		const d = blockData[id], n = d && d.name, en = currentLanguage === "English"
+		if (!n) return ""
+		if (isTool(id)) return toolLabel(d)
+		if (FOOD_LABEL[n]) return FOOD_LABEL[n][en ? 1 : 0]
+		let m
+		if ((m = /^(.+)Wool$/.exec(n)) && NAME_COLORS[m[1]]) return en ? NAME_COLORS[m[1]][2] + " Wool" : "Wełna " + NAME_COLORS[m[1]][0]
+		if ((m = /^(.+)Concrete$/.exec(n)) && NAME_COLORS[m[1]]) return en ? NAME_COLORS[m[1]][2] + " Concrete" : NAME_COLORS[m[1]][1] + " beton"
+		if ((m = /^(.+)Planks$/.exec(n)) && NAME_WOODS[m[1]]) return en ? NAME_WOODS[m[1]][2] + " Planks" : "Deski " + NAME_WOODS[m[1]][0]
+		if ((m = /^(.+)Log$/.exec(n)) && NAME_WOODS[m[1]]) return en ? NAME_WOODS[m[1]][2] + " Log" : "Pień " + NAME_WOODS[m[1]][1]
+		if (ITEM_NAMES[n]) return ITEM_NAMES[n][en ? 1 : 0]
+		return n.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase()) // nowy blok bez wpisu: nazwa z kodu
+	}
+	function drawNameTip(id) {
+		const lab = itemLabel(id)
+		if (!lab) return
+		ctx.font = "14px Poppins"
+		ctx.textAlign = "left"
+		const pad = 9, bw = ctx.measureText(lab).width + pad * 2, bh = 19 + pad * 2 - 6
+		let x = mouseX + 16, y = mouseY - 8
+		if (x + bw > width - 2) x = mouseX - bw - 10
+		if (y + bh > height - 2) y = height - bh - 2
+		if (y < 2) y = 2
+		ctx.fillStyle = "rgba(16, 0, 16, 0.93)"
+		ctx.fillRect(x, y, bw, bh)
+		ctx.lineWidth = 2
+		ctx.strokeStyle = "rgb(70, 24, 130)"
+		ctx.strokeRect(x + 1, y + 1, bw - 2, bh - 2)
+		ctx.fillStyle = "#ffffff"
+		ctx.fillText(lab, x + pad, y + pad + 11)
+		textSize(10)
+		fill(255, 255, 255)
+	}
 	function drawInvTooltip() {
 		if (inventory.holding) return // jak w grze: z przedmiotem na kursorze podpowiedzi nie ma
 		const e = hoverItem()
-		if (!e || !isTool(e[0])) return
+		if (e && foodValue(e[0])) { drawFoodTip(e[0]); return }
+		if (!e) return
+		if (!isTool(e[0])) { drawNameTip(e[0]); return } // zwykły blok lub przedmiot: sama nazwa
 		const d = blockData[e[0]], mx = maxDur(e[0]), cur = Math.max(0, Math.min(e[1], mx)), en = currentLanguage === "English"
 		const lines = [
 			toolLabel(d),
@@ -7357,7 +7749,7 @@ let textures = {
 		drawInvTooltip()
 	}
 	function clickInv(button, shift) {
-		if (!survival && !invTable) {
+		if (!survival && !invTable && !invFurnace) {
 			const t = invTabAt(mouseX, mouseY)
 			if (t) { if (t !== invTab) invScroll = 0; invTab = t; drawScreens.inventory(); return }
 		}
@@ -7548,6 +7940,7 @@ let textures = {
 				if (block === blockIds.oakDoorTop) block = blockIds.oakDoorBottom
 				if (block === blockIds.fire) block = blockIds.lighter
 				if ((block & 0xff) === blockIds.trapdoor) block = blockIds.trapdoor
+				if (block === blockIds.furnaceOn) block = blockIds.furnace
 				index = inventory.hotbar.indexOf(block)
 				if (index >= 0) {
 					inventory.hotbarSlot = index
@@ -7576,7 +7969,11 @@ let textures = {
 				holding = inventory.hotbar[inventory.hotbarSlot]
 				if (e.button === 2 && hitBox.pos && !Key.shift && (world.getBlock(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) & 0xff) === blockIds.craftingTable) {
 					openTable()
+				} else if (e.button === 2 && hitBox.pos && !Key.shift && isFurnaceId(world.getBlock(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) & 0xff)) {
+					openFurnace(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2])
 				} else if (e.button === 2 && hitBox.pos && (toggleDoor(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]) || toggleTrapdoor(hitBox.pos[0], hitBox.pos[1], hitBox.pos[2]))) {
+					p.lastPlace = Date.now()
+				} else if (e.button === 2 && tryEat()) {
 					p.lastPlace = Date.now()
 				} else if (e.button === 2 && holding) {
 					place = true
@@ -8540,6 +8937,10 @@ let textures = {
 
 		if (screen === "play" || screen === "loading") {
 			drawScreens[screen]()
+		}
+		if (screen === "inventory" && invFurnace) { // piec działa na żywo także przy otwartym ekranie
+			tickFurnaces()
+			if (Date.now() - furnDraw > 100) { furnDraw = Date.now(); drawScreens.inventory() }
 		}
 
 		if (Date.now() - analytics.lastUpdate > 500 && analytics.frames) {

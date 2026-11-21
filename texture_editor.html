@@ -255,6 +255,7 @@ details textarea { margin: 8px 0; height: 110px; font-family: var(--font-mono); 
           <option value="one">Jedna tekstura na wszystkich ścianach</option>
           <option value="two">Góra i dół + boki</option>
           <option value="three">Dół + góra + boki</option>
+          <option value="front">Góra + boki + przód (np. piec)</option>
         </select>
       </div>
       <div class="field" id="mobField" hidden>
@@ -373,12 +374,13 @@ var hover = null, drag = null, dirty = false, saveTimer = 0;
 
 function faceKeys(el) {
   if (el.kind === 'mob') return ['skin', 'face'];
-  return el.mode === 'two' ? ['top', 'side'] : el.mode === 'three' ? ['bottom', 'top', 'side'] : ['one'];
+  return el.mode === 'two' ? ['top', 'side'] : el.mode === 'three' ? ['bottom', 'top', 'side'] : el.mode === 'front' ? ['top', 'side', 'front', 'lit'] : ['one'];
 }
 function faceLabel(el, k) {
   if (el.kind === 'item') return 'Sprite';
   if (el.kind === 'mob') return k === 'skin' ? 'Skóra (całe ciało)' : 'Pysk (przód głowy)';
   if (el.mode === 'one') return 'Wszystkie ściany';
+  if (el.mode === 'front') return { top: 'Góra i dół', side: 'Boki i tył', front: 'Przód', lit: 'Przód włączony (osobny blok)' }[k];
   if (k === 'top') return el.mode === 'two' ? 'Góra i dół' : 'Góra';
   return k === 'side' ? 'Boki' : 'Dół';
 }
@@ -387,7 +389,7 @@ function curEl() { return state.items.find(function (e) { return e.id === state.
 function curFace() { var el = curEl(); return el.faces[state.faceKey]; }
 function texName(el, k) {
   if (el.kind === 'mob') return el.name + (k === 'skin' ? 'Skin' : 'Face');
-  return (el.mode === 'one' || k === 'one') ? el.name : el.name + { top: 'Top', side: 'Side', bottom: 'Bottom' }[k];
+  return (el.mode === 'one' || k === 'one') ? el.name : el.name + { top: 'Top', side: 'Side', bottom: 'Bottom', front: 'Front', lit: 'FrontOn' }[k];
 }
 
 function makeEl(kind, name) {
@@ -480,12 +482,13 @@ function faceCanvas(px, shade) {
 }
 function drawCube(cx, size, el) {
   var topPx = el.faces[el.mode === 'one' ? 'one' : 'top'].px, sidePx = el.faces[el.mode === 'one' ? 'one' : 'side'].px;
+  var frontPx = el.mode === 'front' ? el.faces.front.px : sidePx; // przód widać na lewej ścianie ikony, tak jak w grze
   var S = size * 0.46, h = Math.sqrt(3) / 2, k = S / N, mx = size / 2, my = size / 2;
   cx.imageSmoothingEnabled = false;
   cx.setTransform(h * k, 0.5 * k, -h * k, 0.5 * k, mx, my - S);
   cx.drawImage(faceCanvas(topPx, 1), 0, 0);
   cx.setTransform(h * k, 0.5 * k, 0, k, mx - h * S, my - 0.5 * S);
-  cx.drawImage(faceCanvas(sidePx, 0.75), 0, 0);
+  cx.drawImage(faceCanvas(frontPx, 0.75), 0, 0);
   cx.setTransform(h * k, -0.5 * k, 0, k, mx, my);
   cx.drawImage(faceCanvas(sidePx, 0.55), 0, 0);
   cx.setTransform(1, 0, 0, 1, 0, 0);
@@ -820,6 +823,12 @@ function hasAlpha(el) {
 
 /* ---------- kod ---------- */
 function blockLine(el) {
+  if (el.mode === 'front' && el.kind === 'block') { // blok z przodem: gra obraca przód do gracza (front: true); wersja "On" to osobny, ukryty blok
+    var n = el.name, f = el.flags, extra = (f.transparent ? ', transparent: true' : '') + (f.noShadow ? ', shadow: false' : '') + (f.noCollide ? ', noCollide: true' : '');
+    var tx = function (front) { return '["' + n + 'Top", "' + n + 'Top", "' + n + 'Side", "' + n + front + '", "' + n + 'Side", "' + n + 'Side"]'; };
+    return '\t{ name: "' + n + '", textures: ' + tx('Front') + ', front: true' + extra + (f.hidden ? ', hidden: true' : '') + ' },\n' +
+      '\t{ name: "' + n + 'On", textures: ' + tx('FrontOn') + ', front: true, hidden: true' + extra + ' }, // wersja włączona (np. palący się piec); jeśli blok jej nie ma, usuń tę linię i teksturę ' + n + 'FrontOn';
+  }
   var parts = ['name: "' + el.name + '"'];
   if (el.kind === 'item') parts.push('special: true', 'item: true');
   else if (el.mode === 'two') parts.push('textures: ["' + el.name + 'Top", "' + el.name + 'Side"]');
@@ -918,7 +927,7 @@ function importText(text, forced) {
   var map = new Map(found), used = new Set(), added = [];
   found.forEach(function (f) {
     var name = f[0]; if (used.has(name)) return;
-    var mm = name.match(/^(.+)(Top|Side|Bottom)$/), mk = name.match(/^(.+)(Skin|Face)$/), el, orig = (named || forced) ? name : null;
+    var mm = name.match(/^(.+)(Top|Side|Bottom|Front)$/), mk = name.match(/^(.+)(Skin|Face)$/), el, orig = (named || forced) ? name : null;
     if (mk && map.has(mk[1] + 'Skin') && map.has(mk[1] + 'Face')) {
       var mb = mk[1];
       el = makeEl('mob', uniqueName(mb));
@@ -926,6 +935,13 @@ function importText(text, forced) {
       el.model = /^zombie/i.test(mb) ? 'zombie' : /^cow/i.test(mb) ? 'cow' : 'pig';
       used.add(mb + 'Skin'); used.add(mb + 'Face');
       orig = named ? mb : null;
+    } else if (mm && map.has(mm[1] + 'Top') && map.has(mm[1] + 'Side') && map.has(mm[1] + 'Front')) {
+      var fb = mm[1];
+      el = makeEl('block', uniqueName(fb)); el.mode = 'front'; el.faces = {};
+      el.faces.top = newFace(map.get(fb + 'Top')); el.faces.side = newFace(map.get(fb + 'Side')); el.faces.front = newFace(map.get(fb + 'Front'));
+      el.faces.lit = newFace(map.has(fb + 'FrontOn') ? map.get(fb + 'FrontOn') : new Uint8ClampedArray(map.get(fb + 'Front')));
+      used.add(fb + 'Top'); used.add(fb + 'Side'); used.add(fb + 'Front'); used.add(fb + 'FrontOn');
+      orig = named ? fb : null;
     } else if (mm && map.has(mm[1] + 'Top') && map.has(mm[1] + 'Side')) {
       var base = mm[1], three = map.has(base + 'Bottom');
       el = makeEl('block', uniqueName(base)); el.mode = three ? 'three' : 'two'; el.faces = {};
